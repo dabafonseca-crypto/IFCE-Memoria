@@ -189,6 +189,18 @@ dialog input{display:block;width:100%;margin-top:6px}
 @media(max-width:650px){.document-row{align-items:flex-start;flex-direction:column}.document-actions{width:100%}}
 
 
+
+/* DOCUMENTOS LOCAIS */
+.document-entry{padding:4px 0 18px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.document-entry:last-child{border-bottom:0;margin-bottom:0}
+.document-local-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.file-picker{position:relative;overflow:hidden;display:inline-flex;align-items:center}
+.file-picker input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.pdf-preview-container{width:100%;min-height:300px;background:#f4f7f5;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-align:center;color:var(--muted);font-size:11px;padding:10px}
+.pdf-preview-frame{display:block;width:100%;height:min(78vh,900px);min-height:520px;border:0;background:#fff}
+.signature-confirm{margin-top:12px;width:100%}
+@media(max-width:650px){.document-local-actions{width:100%}.document-local-actions>*{flex:1}.pdf-preview-frame{min-height:420px;height:65vh}}
+
 /* LOGIN DEMONSTRATIVO */
 .login-screen{min-height:100vh;display:none;place-items:center;padding:24px;background:radial-gradient(circle at top left,#e2f5e9 0,#f4f7f5 45%,#eef4f0 100%)}
 .login-card{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(16,65,43,.12)}
@@ -378,6 +390,115 @@ function salvarCadernoLocal(caderno){
  atuais.push(caderno);
  localStorage.setItem(LOCAL_CADERNOS_KEY,JSON.stringify(atuais));
 }
+
+// ARQUIVOS E CONFIRMAÇÕES: armazenamento exclusivamente local neste navegador.
+// Os PDFs ficam no IndexedDB; metadados e confirmações ficam no localStorage.
+// Nada deste bloco envia arquivos ou confirmações ao Supabase.
+const LOCAL_DOCUMENT_META_KEY='ifce_memoria_documentos_meta_v1';
+const LOCAL_SIGNATURES_KEY='ifce_memoria_assinaturas_v1';
+const LOCAL_FILES_DB='ifce_memoria_arquivos_v1';
+let documentObjectUrls=[];
+
+function lerMetadadosDocumentos(){
+ try{return JSON.parse(localStorage.getItem(LOCAL_DOCUMENT_META_KEY)||'{}')||{};}
+ catch(e){return {};}
+}
+function salvarMetadadoDocumento(id,meta){
+ const all=lerMetadadosDocumentos();
+ all[String(id)]=meta;
+ localStorage.setItem(LOCAL_DOCUMENT_META_KEY,JSON.stringify(all));
+}
+function removerMetadadoDocumento(id){
+ const all=lerMetadadosDocumentos();
+ delete all[String(id)];
+ localStorage.setItem(LOCAL_DOCUMENT_META_KEY,JSON.stringify(all));
+}
+function metadadoDocumento(id){return lerMetadadosDocumentos()[String(id)]||null;}
+
+function abrirBancoArquivos(){
+ return new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window)){reject(new Error('Este navegador não oferece armazenamento local de arquivos.'));return;}
+  const request=indexedDB.open(LOCAL_FILES_DB,1);
+  request.onupgradeneeded=()=>{
+   const db=request.result;
+   if(!db.objectStoreNames.contains('pdfs'))db.createObjectStore('pdfs',{keyPath:'id'});
+  };
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(request.error||new Error('Não foi possível abrir o armazenamento local.'));
+ });
+}
+async function guardarPdfLocal(id,file){
+ const db=await abrirBancoArquivos();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction('pdfs','readwrite');
+  tx.objectStore('pdfs').put({id:String(id),name:file.name,type:'application/pdf',size:file.size,updatedAt:new Date().toISOString(),blob:file});
+  tx.oncomplete=()=>{db.close();resolve();};
+  tx.onerror=()=>{const error=tx.error;db.close();reject(error||new Error('Falha ao salvar o PDF.'));};
+  tx.onabort=()=>{const error=tx.error;db.close();reject(error||new Error('Armazenamento local indisponível ou sem espaço.'));};
+ });
+}
+async function obterPdfLocal(id){
+ const db=await abrirBancoArquivos();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction('pdfs','readonly');
+  const request=tx.objectStore('pdfs').get(String(id));
+  request.onsuccess=()=>{const result=request.result||null;db.close();resolve(result);};
+  request.onerror=()=>{const error=request.error;db.close();reject(error||new Error('Não foi possível ler o PDF.'));};
+ });
+}
+async function apagarPdfLocal(id){
+ const db=await abrirBancoArquivos();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction('pdfs','readwrite');
+  tx.objectStore('pdfs').delete(String(id));
+  tx.oncomplete=()=>{db.close();resolve();};
+  tx.onerror=()=>{const error=tx.error;db.close();reject(error||new Error('Não foi possível remover o PDF.'));};
+ });
+}
+function revogarPreviewsDocumentos(){
+ documentObjectUrls.forEach(url=>URL.revokeObjectURL(url));
+ documentObjectUrls=[];
+}
+async function carregarPreviewsDocumentos(){
+ const containers=[...document.querySelectorAll('[data-document-preview]')];
+ for(const container of containers){
+  try{
+   const record=await obterPdfLocal(container.dataset.documentPreview);
+   if(!container.isConnected)continue;
+   if(!record?.blob){container.textContent='Arquivo não encontrado neste navegador. Anexe o PDF novamente.';continue;}
+   const url=URL.createObjectURL(record.blob);
+   documentObjectUrls.push(url);
+   const frame=document.createElement('iframe');
+   frame.className='pdf-preview-frame';
+   frame.src=url;
+   frame.title='Pré-visualização do arquivo '+record.name;
+   container.replaceChildren(frame);
+  }catch(error){
+   if(container.isConnected)container.textContent='Não foi possível carregar a pré-visualização. Você ainda pode tentar baixar o arquivo.';
+  }
+ }
+}
+function lerAssinaturasLocais(){
+ try{return JSON.parse(localStorage.getItem(LOCAL_SIGNATURES_KEY)||'{}')||{};}
+ catch(e){return {};}
+}
+function assinaturasDaTransicao(id){return lerAssinaturasLocais()[String(id)]||{};}
+function salvarConfirmacaoLocal(transitionId,role,name){
+ const all=lerAssinaturasLocais();
+ const current=all[String(transitionId)]||{};
+ if(current[role])return false;
+ current[role]={name,at:new Date().toISOString()};
+ all[String(transitionId)]=current;
+ localStorage.setItem(LOCAL_SIGNATURES_KEY,JSON.stringify(all));
+ return true;
+}
+function transitionStatus(t){
+ const sig=assinaturasDaTransicao(t.id);
+ if(sig.outgoing&&sig.incoming)return 'completed';
+ if(sig.outgoing)return 'awaiting_successor';
+ if(sig.incoming)return 'awaiting_approval';
+ return 'in_progress';
+}
 let banco={...demo,notebooks:combinarCadernos(CADERNOS)},pagina='dashboard',detalhe=null,pesquisa='',conectado=false,erro='',feedback='',configuracao=null,usuarioDemo=null;
 
 const campusName=id=>banco.campuses.find(x=>x.id===id)?.name||'Unidade não identificada';
@@ -387,7 +508,7 @@ const cadernoNome=id=>{const n=notebook(id);return n?`${n.function_name} • ${u
 const statusName=s=>({in_progress:'Em andamento',awaiting_successor:'Aguardando sucessor',awaiting_approval:'Aguardando validação',completed:'Concluída',draft:'Rascunho',cancelled:'Cancelada'}[s]||s||'Não informado');
 const badge=s=>`<span class="badge ${s==='completed'?'green':s==='in_progress'?'orange':s==='awaiting_approval'?'blue':''}">${h(statusName(s))}</span>`;
 const checklistOf=id=>banco.checklists.filter(x=>x.transition_id===id);
-const progressOf=t=>{const items=checklistOf(t.id);return items.length?Math.round(100*items.filter(x=>x.is_completed).length/items.length):Number(t.progress||0);};
+const progressOf=t=>{const sig=assinaturasDaTransicao(t.id);return (sig.outgoing?50:0)+(sig.incoming?50:0);};
 function helpTip(text){return `<span class="help-tip" tabindex="0" role="img" aria-label="${h(text)}" data-tip="${h(text)}">?</span>`;}
 const pageHelp={
  'Visão geral':'Resumo dos cadernos, procedimentos e transferências cadastrados.',
@@ -410,7 +531,7 @@ function statusChart(){
   {key:'awaiting_successor',label:'Aguardando sucessor',color:'#4b91cf'},
   {key:'awaiting_approval',label:'Aguardando validação',color:'#9271c7'}
  ];
- const counts=groups.map(g=>({...g,count:banco.transitions.filter(t=>notebookVisivel(t.notebook_id)&&t.status===g.key).length}));
+ const counts=groups.map(g=>({...g,count:banco.transitions.filter(t=>notebookVisivel(t.notebook_id)&&transitionStatus(t)===g.key).length}));
  const total=counts.reduce((s,g)=>s+g.count,0);
  let offset=0;
  const segments=counts.map(g=>{
@@ -464,8 +585,8 @@ function renderDashboard(){
  const proceduresVisiveis=banco.procedures.filter(p=>notebookVisivel(p.notebook_id));
  const transitionsVisiveis=banco.transitions.filter(t=>notebookVisivel(t.notebook_id));
  const transitionIds=new Set(transitionsVisiveis.map(t=>t.id));
- const pendencias=banco.checklists.filter(x=>transitionIds.has(x.transition_id)&&!x.is_completed).length;
- const ativos=transitionsVisiveis.filter(t=>!['completed','cancelled'].includes(t.status)).length;
+ const pendencias=transitionsVisiveis.reduce((total,t)=>{const sig=assinaturasDaTransicao(t.id);return total+(sig.outgoing?0:1)+(sig.incoming?0:1);},0);
+ const ativos=transitionsVisiveis.filter(t=>transitionStatus(t)!=='completed').length;
  const recent=banco.activities.filter(a=>notebookVisivel(a.notebook_id)).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
  const trans=[...transitionsVisiveis].sort((a,b)=>new Date(b.started_at)-new Date(a.started_at)).slice(0,4);
  return pageTitle('PAINEL DE CONTROLE','Visão geral','Acompanhe o conhecimento institucional e as transferências em um só lugar.')+
@@ -478,7 +599,7 @@ function renderDashboard(){
   ${metric('Funções registradas',notebooksVisiveis.length,'Cadernos de funções','▤','cadernos')}
   ${metric('Procedimentos',proceduresVisiveis.length,'Rotinas documentadas','▣','procedimentos')}
   ${metric('Transições ativas',ativos,`De ${transitionsVisiveis.length} cadastradas`,'⇄','transicoes')}
-  ${metric('Etapas pendentes',pendencias,'Itens a concluir','◷','transicoes')}
+  ${metric('Confirmações pendentes',pendencias,'Entrega e recebimento','◷','transicoes')}
  </div>
  <div class="panel-grid">
   <section class="panel"><div class="panel-head"><h3>Situação das transferências ${helpTip('Mostra quantas transferências estão concluídas, em andamento ou aguardando confirmação.')}</h3><small>Distribuição por situação</small></div>${statusChart()}</section>
@@ -486,7 +607,7 @@ function renderDashboard(){
  </div>
  <div class="lower-grid">
   <section class="panel"><div class="panel-head"><h3>Transferências recentes ${helpTip('Lista as passagens de responsabilidade mais recentes da área selecionada.')}</h3><button class="text-link" data-pagina="transicoes">Ver todas →</button></div>
-   ${trans.length?trans.map(t=>`<div class="transition-item"><div class="item-title"><strong>${h(notebook(t.notebook_id)?.function_name||'Função')}</strong>${badge(t.status)}</div><div class="item-meta">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)} · ${h(unidade(notebook(t.notebook_id)))}</div><div class="progress"><span style="width:${progressOf(t)}%"></span></div><div class="item-meta">${progressOf(t)}% das etapas concluídas</div></div>`).join(''):'<div class="empty">Nenhuma transferência cadastrada.</div>'}
+   ${trans.length?trans.map(t=>`<div class="transition-item"><div class="item-title"><strong>${h(notebook(t.notebook_id)?.function_name||'Função')}</strong>${badge(transitionStatus(t))}</div><div class="item-meta">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)} · ${h(unidade(notebook(t.notebook_id)))}</div><div class="progress"><span style="width:${progressOf(t)}%"></span></div><div class="item-meta">${progressOf(t)}% das etapas concluídas</div></div>`).join(''):'<div class="empty">Nenhuma transferência cadastrada.</div>'}
   </section>
   <section class="panel"><div class="panel-head"><h3>Atividades recentes ${helpTip('Mostra registros de atividade relacionados à área selecionada.')}</h3><small>Últimos registros</small></div>
    ${recent.length?recent.map(a=>`<div class="activity"><span class="activity-dot"></span><div class="activity-body"><strong>${h(a.actor_name||'Servidor')}</strong><p>${h(a.description)}<br>${h(cadernoNome(a.notebook_id))} · ${h(dateBR(a.created_at))}</p></div></div>`).join(''):'<div class="empty">Nenhuma atividade registrada.</div>'}
@@ -524,11 +645,11 @@ function renderProcedimentos(){
 }
 
 function renderTransicoes(){
- const rows=banco.transitions.filter(t=>notebookVisivel(t.notebook_id)&&[t.outgoing_responsible,t.incoming_responsible,cadernoNome(t.notebook_id),statusName(t.status)].some(x=>norm(x).includes(norm(pesquisa))));
+ const rows=banco.transitions.filter(t=>notebookVisivel(t.notebook_id)&&[t.outgoing_responsible,t.incoming_responsible,cadernoNome(t.notebook_id),statusName(transitionStatus(t))].some(x=>norm(x).includes(norm(pesquisa))));
  return pageTitle('CONTINUIDADE INSTITUCIONAL','Transições','Acompanhe a passagem de conhecimento entre quem deixa a função e quem assume.')+
  searchBox('Pesquisar função, servidor ou situação...')+
  (rows.length?`<div class="cards">${rows.map(t=>`<button class="data-card clickable" data-abrir="transicao" data-id="${h(t.id)}" title="Abra para acompanhar o que está sendo entregue e recebido na mudança de responsável.">
-  <div class="item-title"><span class="eyebrow">${h(unidade(notebook(t.notebook_id)))}</span>${badge(t.status)}</div>
+  <div class="item-title"><span class="eyebrow">${h(unidade(notebook(t.notebook_id)))}</span>${badge(transitionStatus(t))}</div>
   <h3>${h(notebook(t.notebook_id)?.function_name||'Função')}</h3>
   <p>${h(t.outgoing_responsible)} <b>→</b> ${h(t.incoming_responsible)}</p>
   <div class="progress"><span style="width:${progressOf(t)}%"></span></div>
@@ -537,25 +658,28 @@ function renderTransicoes(){
 }
 
 function renderSignatures(t){
- const bothSigned=['completed','awaiting_approval'].includes(t.status);
- const outgoingSigned=bothSigned||t.status==='awaiting_successor'||t.status==='in_progress';
- const incomingSigned=bothSigned;
- const date=dateBR(t.started_at);
- const signatureCard=(role,name,signed,side)=>`
-  <div class="signature-card ${signed?'':'signature-pending'}">
-   <div class="signature-role">${role}</div>
+ const sig=assinaturasDaTransicao(t.id);
+ const signedAt=value=>value?.at?new Date(value.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'';
+ const signatureCard=(role,label,name,record,buttonLabel)=>{
+  const signed=Boolean(record);
+  return `<div class="signature-card ${signed?'':'signature-pending'}">
+   <div class="signature-role">${label}</div>
    <div class="signature-name">${h(name||'Responsável não informado')}</div>
-   <div class="signature-mark">${signed?h(name||'Assinatura demonstrativa'):'Aguardando confirmação'}</div>
-   <div class="signature-status"><b>${signed?'Assinatura demonstrativa registrada':'Aguardando assinatura'}</b><br>${signed?`Registro visual simulado · ${date}`:'Confirmação não realizada nesta demonstração'}</div>
+   <div class="signature-mark">${signed?h(record.name||name):'Aguardando confirmação'}</div>
+   <div class="signature-status"><b>${signed?'Confirmação registrada':'Aguardando confirmação'}</b><br>${signed?`Registro demonstrativo · ${h(signedAt(record))}`:'Esta parte ainda não confirmou.'}</div>
+   ${signed?'':`<button type="button" class="btn signature-confirm" data-confirmar-transicao="${h(t.id)}" data-papel="${role}">${buttonLabel}</button>`}
   </div>`;
+ };
+ const done=Boolean(sig.outgoing&&sig.incoming);
  return `<section class="detail-panel signature-section">
-  <h3>Confirmação das duas partes ${helpTip('Na transferência, a pessoa que sai confirma a entrega e a pessoa que assume confirma o recebimento. Nesta versão, as assinaturas são apenas demonstrativas.')}</h3>
-  <p class="muted">Representação visual da entrega e do recebimento da responsabilidade.</p>
+  <h3>Confirmação das duas partes ${helpTip('A pessoa que deixa a função confirma a entrega. A pessoa que assume confirma o recebimento. A transferência só termina depois das duas confirmações.')}</h3>
+  <p class="muted">Primeiro confirme a entrega; depois confirme o recebimento. As duas etapas podem ser demonstradas nesta tela.</p>
   <div class="signature-grid">
-   ${signatureCard('Responsável anterior · entrega',t.outgoing_responsible,outgoingSigned,'outgoing')}
-   ${signatureCard('Novo responsável · recebimento',t.incoming_responsible,incomingSigned,'incoming')}
+   ${signatureCard('outgoing','Responsável anterior · entrega',t.outgoing_responsible,sig.outgoing,'Confirmar entrega')}
+   ${signatureCard('incoming','Novo responsável · recebimento',t.incoming_responsible,sig.incoming,'Confirmar recebimento')}
   </div>
-  <div class="signature-disclaimer"><b>Assinaturas simuladas para demonstração.</b> Esta tela não autentica a identidade dos servidores, não utiliza certificado digital e não produz assinatura eletrônica com validade jurídica. A confirmação real dependeria de login individual e integração institucional.</div>
+  ${done?'<div class="notice" style="margin-top:12px;margin-bottom:0"><b>Transferência concluída!</b> As duas confirmações demonstrativas foram registradas.</div>':'<div class="document-note">A transferência permanece em andamento até que as duas partes confirmem.</div>'}
+  <div class="signature-disclaimer"><b>Assinaturas simuladas para demonstração.</b> Os botões registram localmente o nome associado a cada papel. Não verificam a identidade dos servidores, não usam certificado digital e não têm validade jurídica. Os registros ficam somente neste navegador.</div>
  </section>`;
 }
 
@@ -574,7 +698,7 @@ function renderDetail(){
    <section class="detail-panel"><h3>Responsabilidades principais ${helpTip('Resumo do que a pessoa responsável por esta função precisa realizar.')}</h3>${(n.responsibilities||[]).map(x=>`<div class="check-row"><span class="check-symbol">✓</span><div>${h(x)}</div></div>`).join('')||'<p>Não registradas.</p>'}</section>
   </div>
   <section class="detail-panel"><h3>Procedimentos desta função (${ps.length})</h3>${ps.map(p=>`<div class="check-row"><span class="check-symbol">▣</span><div><button class="text-link" data-abrir="procedimento" data-id="${h(p.id)}">${h(p.title)}</button><div class="muted">${h(p.frequency||'')}</div></div></div>`).join('')||'<p>Nenhum procedimento associado.</p>'}</section>
-  <section class="detail-panel" style="margin-top:14px"><h3>Transições relacionadas (${ts.length})</h3>${ts.map(t=>`<div class="check-row"><span class="check-symbol">⇄</span><div><button class="text-link" data-abrir="transicao" data-id="${h(t.id)}">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)}</button><div class="muted">${h(statusName(t.status))}</div></div></div>`).join('')||'<p>Nenhuma transição associada.</p>'}</section>`;
+  <section class="detail-panel" style="margin-top:14px"><h3>Transições relacionadas (${ts.length})</h3>${ts.map(t=>`<div class="check-row"><span class="check-symbol">⇄</span><div><button class="text-link" data-abrir="transicao" data-id="${h(t.id)}">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)}</button><div class="muted">${h(statusName(transitionStatus(t)))}</div></div></div>`).join('')||'<p>Nenhuma transição associada.</p>'}</section>`;
  }
  if(tipo==='procedimento'){
   const p=banco.procedures.find(x=>x.id===id);if(!p)return back+'Registro não encontrado.';if(!notebookVisivel(p.notebook_id))return back+'Este procedimento não pertence à área selecionada neste acesso demonstrativo.';
@@ -611,6 +735,8 @@ function renderDetail(){
   const documentosHTML=docs.map((d,index)=>{
    const demoChecklist=isTramitacao&&!d.storage_path;
    const titulo=demoChecklist?'Checklist de tramitação de processos':d.title;
+   const meta=metadadoDocumento(d.id);
+   const nomeExibido=meta?.name||titulo;
    const previewTitle=demoChecklist?'CHECKLIST DE TRAMITAÇÃO DE PROCESSOS':String(titulo||'DOCUMENTO INSTITUCIONAL').toLocaleUpperCase('pt-BR');
    const previewSubtitle=demoChecklist?'Roteiro demonstrativo para tramitação de processos administrativos':'Pré-visualização ilustrativa do documento associado ao procedimento';
    const previewBody=demoChecklist
@@ -625,32 +751,41 @@ function renderDetail(){
        <div class="preview-check"><span class="preview-box"></span><span>Conteúdo demonstrativo para consulta na apresentação do protótipo.</span></div>
        <div class="preview-section-title">Orientação</div>
        <p style="font-size:9px;line-height:1.7;color:#53685d">Este espaço representa a visualização online do arquivo que poderá ser disponibilizado no sistema institucional.</p>`;
-   return `<div class="document-row"><div class="document-info"><strong>${h(titulo)}</strong><div class="muted">${h(d.description||'Documento associado ao procedimento.')}</div></div><span class="badge green">▧ Visualização na página</span></div>
-    <div class="document-preview-wrap">
-     <div class="document-preview-label"><span>Pré-visualização do documento</span><span>Documento demonstrativo</span></div>
-     <div class="document-preview ${demoChecklist?'':'preview-generic'}" role="img" aria-label="Pré-visualização ilustrativa de ${h(titulo)}">
-      <div class="preview-top">
-       <div class="preview-brand"><span class="preview-mark">IF</span><span><strong>INSTITUTO FEDERAL</strong><small>Educação, Ciência e Tecnologia do Ceará</small></span></div>
-       <span class="preview-stamp">MODELO<br>DEMONSTRATIVO</span>
-      </div>
-      <h4 class="preview-document-title">${h(previewTitle)}</h4>
-      <p class="preview-document-subtitle">${h(previewSubtitle)}</p>
-      <div class="preview-meta">
-       <div><b>Unidade:</b><br>${h(unidade(notebook(p.notebook_id)))}</div>
-       <div><b>Função:</b><br>${h(notebook(p.notebook_id)?.function_name||'—')}</div>
-      </div>
-      ${previewBody}
-      <div class="preview-footer"><span>IFCE Memória · Protótipo acadêmico</span><span>Prévia ${index+1}</span></div>
+   const localPreview=meta
+    ? `<div class="document-preview-label"><span>Pré-visualização do PDF anexado</span><span>Salvo neste navegador</span></div><div class="pdf-preview-container" data-document-preview="${h(d.id)}">Carregando PDF...</div>`
+    : `<div class="document-preview-label"><span>Exemplo de documento</span><span>Modelo ilustrativo</span></div>
+       <div class="document-preview ${demoChecklist?'':'preview-generic'}" role="img" aria-label="Pré-visualização ilustrativa de ${h(titulo)}">
+        <div class="preview-top">
+         <div class="preview-brand"><span class="preview-mark">IF</span><span><strong>INSTITUTO FEDERAL</strong><small>Educação, Ciência e Tecnologia do Ceará</small></span></div>
+         <span class="preview-stamp">MODELO<br>DEMONSTRATIVO</span>
+        </div>
+        <h4 class="preview-document-title">${h(previewTitle)}</h4>
+        <p class="preview-document-subtitle">${h(previewSubtitle)}</p>
+        <div class="preview-meta">
+         <div><b>Unidade:</b><br>${h(unidade(notebook(p.notebook_id)))}</div>
+         <div><b>Função:</b><br>${h(notebook(p.notebook_id)?.function_name||'—')}</div>
+        </div>
+        ${previewBody}
+        <div class="preview-footer"><span>IFCE Memória · Protótipo acadêmico</span><span>Prévia ${index+1}</span></div>
+       </div>`;
+   return `<article class="document-entry">
+    <div class="document-row">
+     <div class="document-info"><strong>${h(nomeExibido)}</strong><div class="muted">${h(meta?`PDF local · ${(meta.size/1024/1024).toFixed(2)} MB · atualizado ${dateBR(meta.updatedAt)}`:(d.description||'Documento demonstrativo associado ao procedimento.'))}</div></div>
+     <div class="document-local-actions">
+      <label class="btn light file-picker">＋ ${meta?'Substituir PDF':'Anexar PDF'}<input type="file" accept="application/pdf,.pdf" data-document-upload="${h(d.id)}" aria-label="Anexar PDF para ${h(titulo)}"></label>
+      ${meta?`<button type="button" class="btn light" data-document-download="${h(d.id)}">↓ Baixar PDF</button><button type="button" class="text-link" data-document-remove="${h(d.id)}">Remover</button>`:''}
      </div>
-    </div>`;
+    </div>
+    <div class="document-preview-wrap">${localPreview}</div>
+   </article>`;
   }).join('');
   return back+pageTitle('PROCEDIMENTO',p.title,cadernoNome(p.notebook_id))+
   `<div class="detail-grid">
    <section class="detail-panel"><h3>Resumo</h3><p><b>Frequência:</b> ${h(p.frequency||'—')}</p><p><b>Objetivo:</b> ${h(p.objective||'—')}</p></section>
    <section class="detail-panel"><h3>Etapas principais ${helpTip('Clique em cada etapa para ver uma explicação curta do que deve ser feito.')}</h3><div class="step-list">${etapasHTML||'<p>Etapas não cadastradas.</p>'}</div></section>
   </div>
-  <section class="detail-panel"><h3>Documentos associados (${docs.length})</h3>${documentosHTML||'<p>Nenhum documento associado.</p>'}
-   <div class="document-note">Pré-visualização ilustrativa exibida diretamente nesta página. Nenhum arquivo é enviado, armazenado ou baixado; este conteúdo é demonstrativo e não altera o Supabase.</div>
+  <section class="detail-panel"><h3>Documentos associados (${docs.length}) ${helpTip('Anexe um PDF pelo botão. Ele ficará salvo somente neste navegador; depois você poderá visualizar ou baixar o arquivo.')}</h3>${documentosHTML||'<p>Nenhum documento associado.</p>'}
+   <div class="document-note">Os PDFs anexados ficam salvos somente no armazenamento local deste navegador (IndexedDB). Não são enviados ao Supabase nem ficam disponíveis em outros computadores. Os modelos sem arquivo anexado são apenas ilustrativos.</div>
   </section>`;
  }
  if(tipo==='transicao'){
@@ -658,7 +793,7 @@ function renderDetail(){
   const items=checklistOf(id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   return back+pageTitle('TRANSFERÊNCIA DE CONHECIMENTO','Transição de responsabilidade',cadernoNome(t.notebook_id))+
   `<section class="detail-panel">
-   <div class="item-title"><h3 style="margin:0">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)}</h3>${badge(t.status)}</div>
+   <div class="item-title"><h3 style="margin:0">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)}</h3>${badge(transitionStatus(t))}</div>
    <p class="muted">Início: ${dateBR(t.started_at)} · Progresso: ${progressOf(t)}%</p>
    <div class="progress"><span style="width:${progressOf(t)}%"></span></div>
    <h3 style="margin-top:23px">Etapas da transferência ${helpTip('Lista de tarefas que ajudam a organizar a passagem do conhecimento para o novo responsável.')}</h3>
@@ -742,6 +877,7 @@ function salvarFormularioCaderno(form){
 }
 
 function render(){
+ revogarPreviewsDocumentos();
  const layout=document.querySelector('.layout');
  const login=$('login-screen');
  if(!usuarioDemo){
@@ -760,7 +896,11 @@ function render(){
  `<div class="notice">${conectado?'Dados de consulta carregados do Supabase.':'Você está vendo dados demonstrativos locais.'} <b>Protótipo acadêmico — informações fictícias.</b> <span>Área exibida: ${usuarioDemo.admin?'todas':h(usuarioDemo.functionName+' · '+usuarioDemo.campusName)}. Alterações nos cadernos não são enviadas ao Supabase.</span></div>`;
  document.querySelectorAll('[data-pagina]').forEach(b=>b.classList.toggle('active',b.dataset.pagina===pagina));
  const el=$('conteudo');
- if(detalhe){el.innerHTML=renderDetail();return;}
+ if(detalhe){
+  el.innerHTML=renderDetail();
+  if(detalhe.tipo==='procedimento')carregarPreviewsDocumentos();
+  return;
+ }
  if(pagina==='dashboard')el.innerHTML=renderDashboard();
  if(pagina==='cadernos')el.innerHTML=renderCadernos();
  if(pagina==='procedimentos')el.innerHTML=renderProcedimentos();
@@ -797,7 +937,47 @@ document.addEventListener('submit',ev=>{
  catch(e){erro=e.message;feedback='';render();}
 });
 
-document.addEventListener('click',ev=>{
+document.addEventListener('click',async ev=>{
+ const downloadButton=ev.target.closest('[data-document-download]');
+ if(downloadButton){
+  try{
+   const record=await obterPdfLocal(downloadButton.dataset.documentDownload);
+   if(!record?.blob)throw new Error('O arquivo não foi encontrado neste navegador.');
+   const url=URL.createObjectURL(record.blob);
+   const link=document.createElement('a');
+   link.href=url;link.download=record.name||'documento.pdf';
+   document.body.appendChild(link);link.click();link.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }catch(error){erro=error.message||'Falha ao baixar o PDF.';feedback='';render();}
+  return;
+ }
+ const removeButton=ev.target.closest('[data-document-remove]');
+ if(removeButton){
+  const id=removeButton.dataset.documentRemove;
+  if(!window.confirm('Remover este PDF do armazenamento local deste navegador?'))return;
+  try{
+   await apagarPdfLocal(id);removerMetadadoDocumento(id);
+   feedback='PDF removido do armazenamento local deste navegador.';erro='';render();
+  }catch(error){erro=error.message||'Não foi possível remover o PDF.';feedback='';render();}
+  return;
+ }
+ const confirmButton=ev.target.closest('[data-confirmar-transicao]');
+ if(confirmButton){
+  const t=banco.transitions.find(item=>String(item.id)===String(confirmButton.dataset.confirmarTransicao));
+  if(!t)return;
+  if(!notebookVisivel(t.notebook_id)){erro='Esta transição não pertence à área selecionada.';render();return;}
+  const role=confirmButton.dataset.papel;
+  const name=role==='outgoing'?t.outgoing_responsible:t.incoming_responsible;
+  try{
+   const saved=salvarConfirmacaoLocal(t.id,role,name);
+   feedback=saved
+    ? (role==='outgoing'?'Confirmação demonstrativa de entrega registrada.':'Confirmação demonstrativa de recebimento registrada.')
+    : 'Esta parte já havia confirmado.';
+   erro='';
+  }catch(error){erro='Não foi possível registrar a confirmação neste navegador.';feedback='';}
+  render();
+  return;
+ }
  const createNotebook=ev.target.closest('[data-caderno-novo]');
  if(createNotebook){abrirFormularioCaderno();return;}
  const editNotebook=ev.target.closest('[data-caderno-editar]');
@@ -818,6 +998,36 @@ document.addEventListener('click',ev=>{
  if(open){detalhe={tipo:open.dataset.abrir,id:open.dataset.id};render();window.scrollTo(0,0);return;}
  const action=ev.target.closest('[data-acao]');
  if(action?.dataset.acao==='voltar'){detalhe=null;render();window.scrollTo(0,0);}
+});
+document.addEventListener('change',async ev=>{
+ const input=ev.target.closest('[data-document-upload]');
+ if(!input)return;
+ const file=input.files?.[0];
+ if(!file)return;
+ const id=input.dataset.documentUpload;
+ if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){
+  erro='Selecione um arquivo PDF.';
+  feedback='';
+  render();
+  return;
+ }
+ if(file.size>20*1024*1024){
+  erro='O PDF ultrapassa o limite de 20 MB desta demonstração. Escolha um arquivo menor.';
+  feedback='';
+  render();
+  return;
+ }
+ try{
+  await guardarPdfLocal(id,file);
+  salvarMetadadoDocumento(id,{name:file.name,size:file.size,updatedAt:new Date().toISOString()});
+  erro='';
+  feedback=`PDF “${file.name}” anexado e salvo neste navegador.`;
+  render();
+ }catch(error){
+  erro='Não foi possível salvar o PDF localmente: '+(error?.message||'armazenamento indisponível.');
+  feedback='';
+  render();
+ }
 });
 document.addEventListener('input',ev=>{
  if(ev.target.id!=='pesquisa')return;
