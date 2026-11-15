@@ -206,6 +206,19 @@ dialog input{display:block;width:100%;margin-top:6px}
 .help-tip{display:inline-grid;place-items:center;position:relative;vertical-align:middle;width:17px;height:17px;margin-left:5px;border-radius:50%;border:1px solid #a9cbb6;background:#f0faf4;color:#087a50;font-size:10px;font-weight:900;cursor:help;outline:none}
 .help-tip::after{content:attr(data-tip);position:absolute;left:50%;top:calc(100% + 9px);transform:translateX(-50%);width:min(260px,72vw);padding:10px 12px;border-radius:9px;background:#123d2d;color:#fff;font-size:10px;font-weight:500;line-height:1.5;text-align:left;white-space:normal;box-shadow:0 8px 22px #102e2140;opacity:0;visibility:hidden;pointer-events:none;z-index:50;transition:opacity .15s ease}
 .help-tip:hover::after,.help-tip:focus-visible::after{opacity:1;visibility:visible}
+
+.management-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:-7px 0 15px}
+.management-note{font-size:10px;line-height:1.55;color:#64796d;background:#eff8f2;border:1px solid #d9ebdf;border-radius:9px;padding:10px 12px;margin-bottom:14px}
+.caderno-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}
+.caderno-form-grid .full{grid-column:1/-1}
+#caderno-dialog{max-height:90vh;overflow:auto}
+#caderno-dialog label{display:block;font-size:11px;font-weight:800;margin-top:13px}
+#caderno-dialog input,#caderno-dialog select,#caderno-dialog textarea{display:block;width:100%;margin-top:6px;border:1px solid #dce8e0;border-radius:9px;padding:11px 12px;background:#fff;color:var(--text);font:inherit;font-size:12px;outline:none}
+#caderno-dialog textarea{min-height:82px;resize:vertical;line-height:1.5}
+#caderno-dialog input:focus,#caderno-dialog select:focus,#caderno-dialog textarea:focus{border-color:#7bc59e;box-shadow:0 0 0 3px #dff5e9}
+.form-hint{font-size:10px;line-height:1.5;color:var(--muted);font-weight:400;margin-top:5px}
+@media(max-width:520px){.caderno-form-grid{grid-template-columns:1fr}.caderno-form-grid .full{grid-column:auto}}
+
 @media(max-width:520px){.login-card{padding:23px}.login-card h1{font-size:22px}}
 
 @media(max-width:1100px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -268,6 +281,10 @@ dialog input{display:block;width:100%;margin-top:6px}
       <button type="submit" id="enviar" class="btn">Conectar e carregar</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="caderno-dialog">
+ <div id="caderno-dialog-content"></div>
 </dialog>
 
 <script>
@@ -346,7 +363,22 @@ const ATIVIDADES=TRANSICOES.flatMap((t,i)=>Array.from({length:[3,4,5,6][i]},(_,j
 })));
 
 const demo={campuses:CAMPUS,notebooks:CADERNOS,procedures:PROCEDIMENTOS,documents:DOCUMENTOS,transitions:TRANSICOES,checklists:CHECKLISTS,activities:ATIVIDADES};
-let banco=demo,pagina='dashboard',detalhe=null,pesquisa='',conectado=false,erro='',configuracao=null,usuarioDemo=null;
+const LOCAL_CADERNOS_KEY='ifce_memoria_cadernos_locais_v1';
+function lerCadernosLocais(){
+ try{const value=JSON.parse(localStorage.getItem(LOCAL_CADERNOS_KEY)||'[]');return Array.isArray(value)?value:[];}
+ catch(e){return [];}
+}
+function combinarCadernos(base){
+ const map=new Map((base||[]).map(n=>[String(n.id),n]));
+ lerCadernosLocais().forEach(n=>map.set(String(n.id),{...(map.get(String(n.id))||{}),...n}));
+ return [...map.values()];
+}
+function salvarCadernoLocal(caderno){
+ const atuais=lerCadernosLocais().filter(n=>String(n.id)!==String(caderno.id));
+ atuais.push(caderno);
+ localStorage.setItem(LOCAL_CADERNOS_KEY,JSON.stringify(atuais));
+}
+let banco={...demo,notebooks:combinarCadernos(CADERNOS)},pagina='dashboard',detalhe=null,pesquisa='',conectado=false,erro='',feedback='',configuracao=null,usuarioDemo=null;
 
 const campusName=id=>banco.campuses.find(x=>x.id===id)?.name||'Unidade não identificada';
 const notebook=id=>banco.notebooks.find(x=>x.id===id);
@@ -402,8 +434,7 @@ function campusChart(){
 
 function notebookVisivel(notebookId){
  if(!usuarioDemo||usuarioDemo.admin)return true;
- const n=notebook(notebookId);
- return !!n&&norm(n.function_name)===norm(usuarioDemo.functionName)&&norm(unidade(n))===norm(usuarioDemo.campusName);
+ return String(notebookId)===String(usuarioDemo.notebookId);
 }
 function renderLogin(){
  const options=banco.notebooks.map(n=>`<option value="${h(n.id)}">${h(n.function_name)} — ${h(unidade(n))}</option>`).join('');
@@ -411,11 +442,11 @@ function renderLogin(){
   <div class="login-brand"><div class="brand-mark">IF</div><div><strong>IFCE Memória</strong><small style="display:block;color:var(--muted);font-size:10px;margin-top:3px">Gestão do conhecimento</small></div></div>
   <div class="eyebrow">ACESSO AO AMBIENTE</div>
   <h1>Entrar no IFCE Memória</h1>
-  <p>Informe um nome, uma senha e escolha a área que deseja visualizar.</p>
+  <p>Informe seus dados e selecione o caderno da sua área.</p>
   <form id="login-form">
    <label>Nome ou e-mail<input name="usuario" autocomplete="username" placeholder="Digite qualquer nome ou e-mail" required></label>
    <label>Senha<input name="senha" type="password" autocomplete="current-password" placeholder="Digite qualquer senha" required></label>
-   <label>Área de acesso
+   <label>Seu caderno / área de trabalho
     <select name="area" required>
      <option value="" selected disabled>Selecione sua área</option>
      <option value="*">Administrador — visualizar todos os cadernos</option>
@@ -465,14 +496,19 @@ function renderDashboard(){
 
 function renderCadernos(){
  const rows=banco.notebooks.filter(n=>notebookVisivel(n.id)&&[n.function_name,n.sector,unidade(n),n.responsible_name].some(x=>norm(x).includes(norm(pesquisa))));
+ const createButton=usuarioDemo?.admin?'<button class="btn" data-caderno-novo>＋ Criar novo caderno</button>':'';
+ const intro=usuarioDemo?.admin
+  ? 'Como administrador, você pode criar cadernos e consultar todos os registros.'
+  : 'Este é o caderno da sua área. Você pode consultar e atualizar as informações da função.';
  return pageTitle('MEMÓRIA INSTITUCIONAL','Funções','Cada função tem seu próprio caderno, preservando as rotinas mesmo quando o responsável muda.')+
+ `<div class="management-toolbar"><span class="muted">${h(intro)}</span>${createButton}</div>
+ <div class="management-note">As alterações feitas nesta demonstração ficam salvas somente neste navegador. Elas não são gravadas no Supabase nem compartilhadas com outros computadores.</div>`+
  searchBox('Pesquisar função, campus, setor ou responsável...')+
- (rows.length?`<div class="cards">${rows.map(n=>`<button class="data-card clickable" data-abrir="caderno" data-id="${h(n.id)}" title="Abra este caderno para consultar as responsabilidades e os procedimentos desta função.">
+ (rows.length?`<div class="cards">${rows.map(n=>`<button class="data-card clickable" data-abrir="caderno" data-id="${h(n.id)}" title="Abra este caderno para consultar e editar as informações desta função.">
   <div class="eyebrow">${h(unidade(n))}</div><h3>${h(n.function_name)}</h3><p>${h(n.sector)}</p>
   <div class="card-footer"><small>Responsável: ${h(n.responsible_name||'Não informado')}</small><span class="badge green">Ver caderno →</span></div>
  </button>`).join('')}</div>`:'<div class="empty">Nenhuma função encontrada.</div>');
 }
-
 function renderProcedimentos(){
  const rows=banco.procedures.filter(p=>notebookVisivel(p.notebook_id)&&[p.title,p.category,cadernoNome(p.notebook_id)].some(x=>norm(x).includes(norm(pesquisa))));
  return pageTitle('ROTINAS DE TRABALHO','Procedimentos','Consulte como as atividades são realizadas e quais documentos apoiam cada rotina.')+
@@ -531,7 +567,9 @@ function renderDetail(){
   const ps=banco.procedures.filter(p=>p.notebook_id===id);
   const ts=banco.transitions.filter(t=>t.notebook_id===id);
   return back+pageTitle('CADERNO DA FUNÇÃO',n.function_name,`${unidade(n)} · ${n.sector}`)+
-  `<div class="detail-grid">
+  `<div class="quick-actions"><button class="btn" data-caderno-editar="${h(n.id)}">✎ Editar informações do caderno</button></div>
+  <div class="management-note">As informações deste caderno podem ser atualizadas nesta demonstração. As alterações ficam salvas somente neste navegador.</div>
+  <div class="detail-grid">
    <section class="detail-panel"><h3>Identificação ${helpTip('Dados básicos da função, incluindo campus, setor e responsável.')}</h3><p><b>Responsável:</b> ${h(n.responsible_name||'Não informado')}</p><p><b>Situação:</b> ${h(n.status||'—')}</p><p>${h(n.description||'Registro da função.')}</p></section>
    <section class="detail-panel"><h3>Responsabilidades principais ${helpTip('Resumo do que a pessoa responsável por esta função precisa realizar.')}</h3>${(n.responsibilities||[]).map(x=>`<div class="check-row"><span class="check-symbol">✓</span><div>${h(x)}</div></div>`).join('')||'<p>Não registradas.</p>'}</section>
   </div>
@@ -633,6 +671,76 @@ function renderDetail(){
  return back+'Conteúdo não encontrado.';
 }
 
+
+function abrirFormularioCaderno(id=null){
+ const existente=id?notebook(id):null;
+ const novo=!existente;
+ if(novo&&!usuarioDemo?.admin){erro='Somente o administrador demonstrativo pode criar novos cadernos.';render();return;}
+ if(existente&&!notebookVisivel(id)){erro='Você só pode editar o caderno da sua área.';render();return;}
+ const campusOptions=banco.campuses.map(c=>`<option value="${h(c.id)}" ${existente?.campus_id===c.id?'selected':''}>${h(c.name)}</option>`).join('');
+ const responsabilidades=(existente?.responsibilities||[]).join('\n');
+ $('caderno-dialog-content').innerHTML=`
+  <div class="eyebrow">GESTÃO DOS CADERNOS</div>
+  <h2>${novo?'Criar novo caderno':'Editar caderno da função'}</h2>
+  <p>${novo?'Cadastre uma função e identifique sua unidade e responsável.':'Atualize as informações principais desta função.'}</p>
+  <form id="caderno-form" data-mode="${novo?'new':'edit'}" data-id="${h(existente?.id||'')}">
+   <div class="caderno-form-grid">
+    <label class="full">Nome da função<input name="function_name" maxlength="120" value="${h(existente?.function_name||'')}" placeholder="Ex.: Coordenação Administrativa" required></label>
+    <label>Campus / unidade<select name="campus_id" required><option value="" disabled ${!existente?'selected':''}>Selecione a unidade</option>${campusOptions}</select></label>
+    <label>Setor<input name="sector" maxlength="100" value="${h(existente?.sector||'')}" placeholder="Ex.: Administração" required></label>
+    <label class="full">Servidor responsável<input name="responsible_name" maxlength="120" value="${h(existente?.responsible_name||usuarioDemo?.name||'')}" placeholder="Nome do responsável"></label>
+    <label class="full">Descrição da função<textarea name="description" maxlength="700" placeholder="Explique resumidamente para que serve esta função.">${h(existente?.description||'')}</textarea></label>
+    <label class="full">Principais responsabilidades<textarea name="responsibilities" maxlength="1200" placeholder="Digite uma responsabilidade por linha.">${h(responsabilidades)}</textarea><div class="form-hint">Escreva uma responsabilidade por linha. Exemplo: Organizar processos / Acompanhar atividades / Compartilhar informações.</div></label>
+   </div>
+   <div class="dialog-actions">
+    <button type="button" class="btn light" data-caderno-cancel>Cancelar</button>
+    <button type="submit" class="btn">${novo?'Criar caderno':'Salvar alterações'}</button>
+   </div>
+  </form>
+  <div class="form-hint">Demonstração: os dados serão salvos no armazenamento local deste navegador, não no Supabase.</div>`;
+ $('caderno-dialog').showModal();
+}
+
+function salvarFormularioCaderno(form){
+ const data=new FormData(form);
+ const mode=form.dataset.mode;
+ const existingId=form.dataset.id;
+ const existing=existingId?notebook(existingId):null;
+ const functionName=String(data.get('function_name')||'').trim();
+ const campusId=String(data.get('campus_id')||'');
+ const sector=String(data.get('sector')||'').trim();
+ if(!functionName||!campusId||!sector)throw new Error('Preencha o nome da função, a unidade e o setor.');
+ if(!banco.campuses.some(c=>String(c.id)===campusId))throw new Error('Selecione uma unidade válida.');
+ const responsibilities=String(data.get('responsibilities')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ const id=mode==='new'?'local_'+Date.now()+'_'+Math.random().toString(36).slice(2,7):existingId;
+ const updated={
+  ...(existing||{}),
+  id,
+  campus_id:campusId,
+  function_name:functionName,
+  sector,
+  responsible_name:String(data.get('responsible_name')||'').trim(),
+  description:String(data.get('description')||'').trim()||`Caderno de informações da função ${functionName}.`,
+  responsibilities,
+  status:existing?.status||'active',
+  local_demo:true
+ };
+ salvarCadernoLocal(updated);
+ if(mode==='new')banco.notebooks.push(updated);
+ else banco.notebooks=banco.notebooks.map(n=>String(n.id)===String(id)?updated:n);
+ if(usuarioDemo&&!usuarioDemo.admin&&String(usuarioDemo.notebookId)===String(id)){
+  usuarioDemo.functionName=updated.function_name;
+  usuarioDemo.campusName=unidade(updated);
+ }
+ $('caderno-dialog').close();
+ feedback=mode==='new'?'Novo caderno criado e salvo neste navegador.':'Informações do caderno atualizadas neste navegador.';
+ erro='';
+ detalhe={tipo:'caderno',id};
+ pagina='cadernos';
+ render();
+ window.scrollTo(0,0);
+}
+
 function render(){
  const layout=document.querySelector('.layout');
  const login=$('login-screen');
@@ -648,7 +756,8 @@ function render(){
  $('estado').textContent=conectado?'Supabase conectado':'Demonstração local';
  $('estado').className='status-pill'+(conectado?'':' local');
  $('mensagem').innerHTML=erro?`<div class="notice error">${h(erro)}</div>`:
- `<div class="notice">${conectado?'Dados consultados no Supabase.':'Você está vendo dados demonstrativos locais.'} <b>Protótipo acadêmico — informações fictícias.</b> <span>Área exibida: ${usuarioDemo.admin?'todas':h(usuarioDemo.functionName+' · '+usuarioDemo.campusName)}.</span></div>`;
+ feedback?`<div class="notice">${h(feedback)} <b>As alterações ficam somente neste navegador.</b></div>`:
+ `<div class="notice">${conectado?'Dados de consulta carregados do Supabase.':'Você está vendo dados demonstrativos locais.'} <b>Protótipo acadêmico — informações fictícias.</b> <span>Área exibida: ${usuarioDemo.admin?'todas':h(usuarioDemo.functionName+' · '+usuarioDemo.campusName)}. Alterações nos cadernos não são enviadas ao Supabase.</span></div>`;
  document.querySelectorAll('[data-pagina]').forEach(b=>b.classList.toggle('active',b.dataset.pagina===pagina));
  const el=$('conteudo');
  if(detalhe){el.innerHTML=renderDetail();return;}
@@ -670,17 +779,30 @@ document.addEventListener('submit',ev=>{
  usuarioDemo={
   name:String(form.get('usuario')||'Servidor demonstrativo').trim(),
   admin:areaId==='*',
+  notebookId:selected?.id||null,
   functionName:selected?.function_name||'Todas as áreas',
   campusName:selected?unidade(selected):'Todas as unidades'
  };
- pagina='dashboard';detalhe=null;pesquisa='';erro='';
+ pagina='dashboard';detalhe=null;pesquisa='';erro='';feedback='';
  render();
 });
 $('sair').addEventListener('click',()=>{
  usuarioDemo=null;detalhe=null;pesquisa='';erro='';
  render();
 });
+document.addEventListener('submit',ev=>{
+ if(ev.target.id!=='caderno-form')return;
+ ev.preventDefault();
+ try{salvarFormularioCaderno(ev.target);}
+ catch(e){erro=e.message;feedback='';render();}
+});
+
 document.addEventListener('click',ev=>{
+ const createNotebook=ev.target.closest('[data-caderno-novo]');
+ if(createNotebook){abrirFormularioCaderno();return;}
+ const editNotebook=ev.target.closest('[data-caderno-editar]');
+ if(editNotebook){abrirFormularioCaderno(editNotebook.dataset.cadernoEditar);return;}
+ if(ev.target.closest('[data-caderno-cancel]')){$('caderno-dialog').close();return;}
  const stepToggle=ev.target.closest('[data-step-toggle]');
  if(stepToggle){
   const panel=document.getElementById(stepToggle.getAttribute('aria-controls'));
@@ -729,7 +851,7 @@ async function conectar(config){
    if(!response.ok)throw Error(`${table}: HTTP ${response.status}. ${(await response.text()).slice(0,220)}`);
    return response.json();
   }));
-  banco={campuses:results[0],notebooks:results[1],procedures:results[2],documents:results[3],transitions:results[4],checklists:results[5],activities:results[6]};
+  banco={campuses:results[0],notebooks:combinarCadernos(results[1]),procedures:results[2],documents:results[3],transitions:results[4],checklists:results[5],activities:results[6]};
   conectado=true;configuracao={url,chave};erro='';detalhe=null;pesquisa='';
   localStorage.setItem('ifce_config_publica',JSON.stringify(configuracao));
   $('janela').close();render();
