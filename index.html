@@ -1,1085 +1,2329 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IFCE Memória | Gestão do conhecimento</title>
-<!-- Protótipo acadêmico: etapas interativas, pré-visualização ilustrativa e assinaturas simuladas. -->
-<style>
-:root{
-  --green:#087a50;--green-dark:#064b37;--green-deep:#043b2d;
-  --mint:#dff5e9;--mint-2:#eff9f3;--bg:#f4f7f5;--white:#fff;
-  --text:#18372b;--muted:#70847a;--line:#e2ebe5;
-  --orange:#d98a18;--red:#c65353;--blue:#3979b8;
-  --shadow:0 10px 30px rgba(16,65,43,.07);
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,system-ui,sans-serif}
-button,input{font:inherit}
-button{cursor:pointer}
-.layout{display:flex;min-height:100vh}
-.sidebar{width:248px;flex:0 0 248px;background:linear-gradient(180deg,var(--green-dark),var(--green-deep));color:#fff;padding:25px 15px;display:flex;flex-direction:column}
-.brand{display:flex;align-items:center;gap:11px;padding:2px 8px 30px}
-.brand-mark{width:39px;height:39px;border-radius:12px;background:#fff;color:var(--green-dark);display:grid;place-items:center;font-weight:900;font-size:18px}
-.brand strong{display:block;font-size:17px;letter-spacing:.1px}
-.brand small{display:block;color:#b9d9ca;font-size:11px;margin-top:4px}
-.nav-label{font-size:10px;letter-spacing:1.4px;color:#9fc5b2;padding:0 12px;margin:0 0 12px}
-.menu{display:flex;align-items:center;gap:12px;width:100%;padding:13px 12px;margin:3px 0;border:0;border-left:3px solid transparent;border-radius:9px;background:transparent;color:#d9eee3;text-align:left;font-size:13px;transition:.2s}
-.menu .ico{width:22px;text-align:center;font-size:17px}
-.menu:hover,.menu.active{background:#ffffff18;color:#fff}
-.menu.active{border-left-color:#62e1aa;background:#ffffff20}
-.sidebar-foot{margin-top:auto;padding:17px 10px 4px;border-top:1px solid #ffffff26;color:#b7d4c5;font-size:10px;line-height:1.7}
-.main{flex:1;min-width:0}
-.topbar{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;gap:14px;position:sticky;top:0;z-index:5}
-.top-title strong{font-size:14px}.top-title small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
-.top-actions{display:flex;align-items:center;gap:10px}
-.status-pill{display:inline-flex;align-items:center;gap:7px;border-radius:30px;padding:7px 11px;background:var(--mint);color:var(--green);font-size:11px;font-weight:700;white-space:nowrap}
-.status-pill:before{content:"";width:7px;height:7px;border-radius:50%;background:#16a56c}
-.status-pill.local{background:#f0f2f0;color:#68766e}
-.status-pill.local:before{background:#9aa69f}
-.btn{border:0;border-radius:9px;padding:10px 14px;background:var(--green);color:#fff;font-size:12px;font-weight:700;box-shadow:0 3px 9px #087a5020;transition:.2s}
-.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
-.btn.light{background:#fff;color:var(--green);border:1px solid var(--line);box-shadow:none}
-.content{max-width:1500px;margin:0 auto;padding:27px 30px 45px}
-.notice{padding:11px 14px;border-radius:10px;background:#e9f6ee;border:1px solid #cce8d7;color:#286347;font-size:11px;margin-bottom:22px}
-.notice.error{background:#fff0ec;border-color:#f0d0c5;color:#8a3f2b}
-.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:22px}
-.page-head h1{font-size:27px;letter-spacing:-.7px;margin:0 0 6px}
-.page-head p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
-.eyebrow{color:var(--green);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;font-weight:800;margin-bottom:7px}
-.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:17px}
-.metric{border:1px solid var(--line);border-radius:15px;padding:17px 18px;background:#fff;text-align:left;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:.2s;min-width:0}
-.metric:hover{transform:translateY(-3px);border-color:#b8dfc8}
-.metric-top{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:11px}
-.metric-icon{width:34px;height:34px;border-radius:11px;background:var(--mint-2);color:var(--green);display:grid;place-items:center;font-size:17px}
-.metric-value{font-size:31px;font-weight:850;letter-spacing:-1px;margin:11px 0 3px;color:var(--green-dark)}
-.metric-note{font-size:10px;color:var(--muted)}
-.panel-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:15px;margin-bottom:15px}
-.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:19px;box-shadow:var(--shadow);min-width:0}
-.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
-.panel-head h3{font-size:14px;margin:0}
-.panel-head small{font-size:10px;color:var(--muted)}
-.donut-layout{display:flex;align-items:center;gap:24px;min-height:205px}
-.donut{width:174px;height:174px;flex:0 0 174px;border-radius:50%;position:relative;display:grid;place-items:center;background:conic-gradient(#e7eee9 0 100%)}
-.donut:after{content:"";position:absolute;inset:21px;background:#fff;border-radius:50%}
-.donut-center{position:relative;z-index:1;text-align:center}
-.donut-center strong{display:block;font-size:31px;color:var(--green-dark)}
-.donut-center span{font-size:10px;color:var(--muted)}
-.legend{display:grid;gap:12px;flex:1;min-width:0}
-.legend-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px}
-.legend-name{display:flex;align-items:center;gap:8px;color:#53685d}
-.legend-dot{width:9px;height:9px;border-radius:3px;flex:0 0 9px}
-.legend-row b{font-size:12px;color:var(--text)}
-.bar-list{display:grid;gap:15px}
-.bar-row{display:grid;grid-template-columns:minmax(100px,145px) 1fr 25px;align-items:center;gap:10px;font-size:11px}
-.bar-name{color:#52675c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar-track{height:10px;background:#edf3ef;border-radius:20px;overflow:hidden}
-.bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#0b8054,#5bc794);min-width:0;transition:width .6s ease}
-.bar-number{text-align:right;font-weight:800;color:var(--green-dark)}
-.lower-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:15px}
-.transition-item{padding:12px 0;border-bottom:1px solid var(--line)}
-.transition-item:last-child{border-bottom:0;padding-bottom:0}
-.item-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.item-title strong{font-size:12px}
-.item-meta{font-size:10px;color:var(--muted);margin-top:5px}
-.progress{height:7px;border-radius:20px;background:#eaf1ec;overflow:hidden;margin-top:9px}
-.progress>span{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#087a50,#5bc794)}
-.text-link{border:0;background:none;padding:0;color:var(--green);font-weight:800;text-align:left}
-.text-link:hover{text-decoration:underline}
-.badge{display:inline-flex;align-items:center;border-radius:30px;padding:5px 9px;font-size:10px;font-weight:700;background:#edf3ef;color:#63766b;white-space:nowrap}
-.badge.green{background:#e4f6eb;color:#087a50}
-.badge.orange{background:#fff2dc;color:#9a650d}
-.badge.blue{background:#eaf2fb;color:#3979b8}
-.activity{display:flex;gap:12px;position:relative;padding:0 0 15px}
-.activity:not(:last-child):before{content:"";position:absolute;left:5px;top:13px;bottom:-1px;width:1px;background:#d9e9df}
-.activity-dot{width:11px;height:11px;border-radius:50%;background:#24aa73;border:3px solid #e4f5eb;flex:0 0 11px;position:relative;z-index:1;margin-top:2px}
-.activity-body{min-width:0}
-.activity-body strong{font-size:11px}
-.activity-body p{font-size:10px;color:var(--muted);margin:4px 0 0;line-height:1.5}
-.quick-actions{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 17px}
-.quick{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:10px;background:#fff;border:1px solid var(--line);color:var(--green-dark);font-size:11px;font-weight:700;box-shadow:0 3px 12px #174b2808}
-.quick:hover{border-color:#9bcfb0;background:#fafffc}
-.search-row{display:flex;gap:10px;margin-bottom:15px}
-.search{flex:1;min-width:0;border:1px solid #dce8e0;border-radius:10px;padding:12px 14px;background:#fff;font-size:12px;outline:none}
-.search:focus{border-color:#7bc59e;box-shadow:0 0 0 3px #dff5e9}
-.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
-.data-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;text-align:left;color:inherit;box-shadow:var(--shadow);transition:.2s;min-width:0}
-.data-card.clickable{cursor:pointer}
-.data-card.clickable:hover{transform:translateY(-3px);border-color:#a8d6b9}
-.data-card h3{font-size:13px;margin:0 0 7px;color:var(--green-dark)}
-.data-card p{font-size:11px;color:var(--muted);margin:5px 0;line-height:1.5}
-.card-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}
-.card-footer small{font-size:10px;color:var(--muted)}
-.detail-back{margin-bottom:17px}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:15px 0}
-.detail-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px;box-shadow:var(--shadow)}
-.detail-panel h3{font-size:14px;margin:0 0 13px}
-.detail-panel p{font-size:12px;line-height:1.6;margin:8px 0}
-.check-row{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}
-.check-row:last-child{border-bottom:0}
-.check-symbol{width:21px;height:21px;display:grid;place-items:center;border-radius:7px;background:#e5f5eb;color:var(--green);font-weight:900;flex:0 0 21px}
-.check-symbol.pending{background:#f0f3f1;color:#9aa79f}
-.muted{color:var(--muted);font-size:10px;margin-top:3px}
-.empty{padding:28px;text-align:center;color:var(--muted);font-size:12px;background:#fff;border:1px dashed #d7e5dc;border-radius:12px}
-dialog{border:0;border-radius:17px;padding:25px;width:min(520px,calc(100% - 24px));box-shadow:0 25px 90px #0005;color:var(--text)}
-dialog::backdrop{background:#062b1f99;backdrop-filter:blur(3px)}
-dialog h2{font-size:20px;margin:0 0 8px}
-dialog p{font-size:12px;color:var(--muted);line-height:1.6}
-dialog label{display:block;font-size:11px;font-weight:800;margin-top:14px}
-dialog input{display:block;width:100%;margin-top:6px}
-.dialog-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:20px}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IFCE Memória — Campus Mombaça | Protótipo acadêmico</title>
 
-.step-list{display:grid;gap:9px}
-.step-item{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
-.step-trigger{width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border:0;background:#fff;color:var(--text);text-align:left;transition:background .18s}
-.step-trigger:hover,.step-trigger[aria-expanded="true"]{background:#f5fbf7}
-.step-number{width:27px;height:27px;flex:0 0 27px;display:grid;place-items:center;border-radius:9px;background:var(--mint);color:var(--green);font-size:11px;font-weight:800}
-.step-label{flex:1;font-size:12px;font-weight:700;line-height:1.4}
-.step-chevron{color:var(--green);font-size:15px;transition:transform .18s}
-.step-trigger[aria-expanded="true"] .step-chevron{transform:rotate(180deg)}
-.step-explain{padding:0 16px 14px 53px;color:#60766a;font-size:11px;line-height:1.65;background:#f5fbf7}
-.step-explain[hidden]{display:none}
-.document-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
-.document-row:last-child{border-bottom:0}
-.document-info{min-width:0}
-.document-info strong{font-size:12px}
-.document-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.document-actions .btn{white-space:nowrap}
-.document-note{margin-top:10px;padding:10px 12px;border-radius:9px;background:var(--mint-2);color:#547365;font-size:10px;line-height:1.5}
-.document-preview-wrap{margin-top:14px}
-.document-preview-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;font-size:10px;color:var(--muted)}
-.document-preview{max-width:760px;margin:0 auto;background:#fff;border:1px solid #dbe5de;border-radius:5px;box-shadow:0 8px 24px #173d2912;padding:clamp(18px,4vw,38px);color:#263b31}
-.preview-top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;border-bottom:2px solid var(--green);padding-bottom:13px;margin-bottom:20px}
-.preview-brand{display:flex;align-items:center;gap:10px}
-.preview-mark{width:34px;height:34px;border-radius:8px;background:var(--green-dark);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:900;flex:0 0 34px}
-.preview-brand strong{display:block;font-size:12px;color:var(--green-dark)}
-.preview-brand small{display:block;margin-top:3px;font-size:9px;color:var(--muted)}
-.preview-stamp{border:1px solid #b7d9c5;border-radius:5px;padding:6px 8px;color:var(--green);font-size:8px;font-weight:800;letter-spacing:.7px;text-align:center}
-.preview-document-title{text-align:center;margin:18px 0 6px;font-size:16px;color:#173d2d}
-.preview-document-subtitle{text-align:center;margin:0 0 22px;font-size:9px;color:var(--muted)}
-.preview-meta{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px;margin-bottom:18px;padding:12px;background:#f6faf7;border:1px solid #e3eee7;border-radius:5px}
-.preview-meta div{font-size:9px;line-height:1.5;color:#53685d}
-.preview-meta b{color:#284c39}
-.preview-section-title{font-size:10px;font-weight:800;color:var(--green-dark);margin:17px 0 8px;text-transform:uppercase;letter-spacing:.5px}
-.preview-check{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid #edf1ee;font-size:9px;line-height:1.5;color:#40564a}
-.preview-check:last-child{border-bottom:0}
-.preview-box{width:12px;height:12px;border:1px solid #8cae9a;border-radius:2px;flex:0 0 12px;margin-top:1px}
-.preview-line{height:1px;background:#dfe9e2;margin:8px 0}
-.preview-footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #e3ebe5;margin-top:22px;padding-top:10px;font-size:8px;color:#819187}
-.preview-generic{min-height:180px}
-.preview-generic .preview-document-title{text-align:left}
-.signature-section{margin-top:15px}
-.signature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.signature-card{border:1px solid var(--line);border-radius:12px;padding:15px;background:#fff;min-width:0}
-.signature-role{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:800}
-.signature-name{font-size:13px;font-weight:800;color:var(--green-dark);margin:8px 0 4px}
-.signature-mark{height:43px;display:flex;align-items:center;border-bottom:1px solid #cbd9d0;margin:4px 0 8px;color:#176b49;font-family:"Segoe Script","Comic Sans MS",cursive;font-size:20px;font-style:italic}
-.signature-status{font-size:10px;color:var(--muted);line-height:1.5}
-.signature-status b{color:var(--green)}
-.signature-pending .signature-mark{color:#a1ada5;font-family:inherit;font-size:11px;font-style:normal}
-.signature-pending .signature-status b{color:#8a6a2c}
-.signature-disclaimer{margin-top:11px;padding:10px 12px;border-radius:9px;background:#f5f7f5;border:1px solid #e4ebe6;color:#68796f;font-size:10px;line-height:1.5}
-@media(max-width:650px){
- .signature-grid{grid-template-columns:1fr}
- .preview-meta{grid-template-columns:1fr}
- .preview-top{align-items:flex-start}
- .preview-stamp{font-size:7px}
-}
-@media(max-width:650px){.document-row{align-items:flex-start;flex-direction:column}.document-actions{width:100%}}
+  <!-- Fonte Inter para excelente legibilidade institucional -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-
-
-/* DOCUMENTOS LOCAIS */
-.document-entry{padding:4px 0 18px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.document-entry:last-child{border-bottom:0;margin-bottom:0}
-.document-local-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.file-picker{position:relative;overflow:hidden;display:inline-flex;align-items:center}
-.file-picker input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
-.pdf-preview-container{width:100%;min-height:300px;background:#f4f7f5;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-align:center;color:var(--muted);font-size:11px;padding:10px}
-.pdf-preview-frame{display:block;width:100%;height:min(78vh,900px);min-height:520px;border:0;background:#fff}
-.signature-confirm{margin-top:12px;width:100%}
-@media(max-width:650px){.document-local-actions{width:100%}.document-local-actions>*{flex:1}.pdf-preview-frame{min-height:420px;height:65vh}}
-
-/* LOGIN DEMONSTRATIVO */
-.login-screen{min-height:100vh;display:none;place-items:center;padding:24px;background:radial-gradient(circle at top left,#e2f5e9 0,#f4f7f5 45%,#eef4f0 100%)}
-.login-card{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(16,65,43,.12)}
-.login-brand{display:flex;align-items:center;gap:11px;margin-bottom:28px}
-.login-brand .brand-mark{background:var(--green-dark);color:#fff}
-.login-card h1{font-size:25px;letter-spacing:-.5px;color:var(--green-dark);margin:4px 0 8px}
-.login-card>p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 20px}
-.login-card label{display:block;font-size:11px;font-weight:800;margin:13px 0 0}
-.login-card input,.login-card select{display:block;width:100%;margin-top:6px;border:1px solid #dce8e0;border-radius:10px;padding:12px;background:#fff;color:var(--text);font:inherit;font-size:12px;outline:none}
-.login-card input:focus,.login-card select:focus{border-color:#7bc59e;box-shadow:0 0 0 3px #dff5e9}
-.login-card .btn{width:100%;margin-top:19px;padding:13px}
-.login-demo-note{margin-top:16px;padding:11px 12px;border-radius:10px;background:#fff7e8;border:1px solid #f0dfbd;color:#7b612e;font-size:10px;line-height:1.55}
-.user-pill{display:inline-flex;align-items:center;gap:6px;border-radius:30px;padding:7px 10px;background:#edf6f0;color:#236247;font-size:10px;font-weight:700;white-space:nowrap}
-.user-pill:before{content:"";width:6px;height:6px;border-radius:50%;background:#19a66b}
-.help-tip{display:inline-grid;place-items:center;position:relative;vertical-align:middle;width:17px;height:17px;margin-left:5px;border-radius:50%;border:1px solid #a9cbb6;background:#f0faf4;color:#087a50;font-size:10px;font-weight:900;cursor:help;outline:none}
-.help-tip::after{content:attr(data-tip);position:absolute;left:50%;top:calc(100% + 9px);transform:translateX(-50%);width:min(260px,72vw);padding:10px 12px;border-radius:9px;background:#123d2d;color:#fff;font-size:10px;font-weight:500;line-height:1.5;text-align:left;white-space:normal;box-shadow:0 8px 22px #102e2140;opacity:0;visibility:hidden;pointer-events:none;z-index:50;transition:opacity .15s ease}
-.help-tip:hover::after,.help-tip:focus-visible::after{opacity:1;visibility:visible}
-
-.management-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:-7px 0 15px}
-.management-note{font-size:10px;line-height:1.55;color:#64796d;background:#eff8f2;border:1px solid #d9ebdf;border-radius:9px;padding:10px 12px;margin-bottom:14px}
-.caderno-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}
-.caderno-form-grid .full{grid-column:1/-1}
-#caderno-dialog{max-height:90vh;overflow:auto}
-#caderno-dialog label{display:block;font-size:11px;font-weight:800;margin-top:13px}
-#caderno-dialog input,#caderno-dialog select,#caderno-dialog textarea{display:block;width:100%;margin-top:6px;border:1px solid #dce8e0;border-radius:9px;padding:11px 12px;background:#fff;color:var(--text);font:inherit;font-size:12px;outline:none}
-#caderno-dialog textarea{min-height:82px;resize:vertical;line-height:1.5}
-#caderno-dialog input:focus,#caderno-dialog select:focus,#caderno-dialog textarea:focus{border-color:#7bc59e;box-shadow:0 0 0 3px #dff5e9}
-.form-hint{font-size:10px;line-height:1.5;color:var(--muted);font-weight:400;margin-top:5px}
-@media(max-width:520px){.caderno-form-grid{grid-template-columns:1fr}.caderno-form-grid .full{grid-column:auto}}
-
-@media(max-width:520px){.login-card{padding:23px}.login-card h1{font-size:22px}}
-
-@media(max-width:1100px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:820px){.panel-grid,.lower-grid{grid-template-columns:1fr}.donut-layout{justify-content:center}}
-@media(max-width:650px){
- .sidebar{width:68px;flex-basis:68px;padding:17px 6px}
- .brand{padding:0 7px 25px}.brand-mark{width:39px;height:39px}.brand-copy,.nav-label,.menu .label,.sidebar-foot{display:none}
- .menu{justify-content:center;padding:13px 5px}.menu .ico{font-size:19px}
- .topbar{padding:0 13px;height:65px}.top-title small{display:none}.top-actions{gap:6px}.top-actions .status-pill{font-size:0;padding:9px}.top-actions .status-pill:before{width:8px;height:8px}.top-actions .btn{padding:9px;font-size:10px}
- .content{padding:18px 13px 30px}.page-head h1{font-size:23px}.page-head{align-items:flex-start}
- .cards{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.donut-layout{gap:15px}.donut{width:145px;height:145px;flex-basis:145px}.donut:after{inset:18px}.bar-row{grid-template-columns:100px 1fr 20px}
-}
-@media(max-width:390px){.metrics{gap:8px}.metric{padding:12px}.metric-value{font-size:26px}.metric-top{font-size:10px}.metric-icon{width:29px;height:29px}.donut-layout{flex-direction:column}.legend{width:100%}}
-</style>
+  <!-- Tailwind CSS via CDN com configuração da paleta institucional -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            ifce: {
+              DEFAULT: '#1E7E34',
+              dark: '#166534',
+              soft: '#E8F5EC',
+              border: '#C6E7CE',
+            },
+            surface: {
+              bg: '#F4F6F5',
+              card: '#FFFFFF',
+              line: '#E2E8F0',
+            }
+          }
+        }
+      }
+    };
+  </script>
 </head>
-<body>
-<div id="login-screen" class="login-screen"></div>
-<div class="layout">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark">IF</div>
-      <div class="brand-copy"><strong>IFCE Memória</strong><small>Gestão do conhecimento</small></div>
-    </div>
-    <div class="nav-label">MENU PRINCIPAL</div>
-    <nav id="menu">
-      <button class="menu active" data-pagina="dashboard" title="Resumo geral do conteúdo e das transferências."><span class="ico">▦</span><span class="label">Visão geral</span></button>
-      <button class="menu" data-pagina="cadernos" title="Consulte o caderno que reúne as informações de uma função."><span class="ico">▤</span><span class="label">Funções</span></button>
-      <button class="menu" data-pagina="procedimentos" title="Veja como as atividades de trabalho devem ser realizadas."><span class="ico">▣</span><span class="label">Procedimentos</span></button>
-      <button class="menu" data-pagina="transicoes" title="Acompanhe a passagem de conhecimento entre quem sai e quem assume uma função."><span class="ico">⇄</span><span class="label">Transições</span></button>
-    </nav>
-    <div class="sidebar-foot">PROTÓTIPO ACADÊMICO<br>Dados demonstrativos<br>Não é um sistema oficial do IFCE.</div>
-  </aside>
+<body class="bg-surface-bg text-slate-800 font-sans antialiased overflow-x-hidden min-h-screen">\n  <!-- =========================================================
+       ACESSO DEMONSTRATIVO (SEM AUTENTICAÇÃO REAL)
+       ========================================================= -->
+  <section id="demo-login-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="demo-login-title">
+    <div class="w-full max-w-md overflow-hidden rounded-3xl border border-white/60 bg-white shadow-2xl">
+      <div class="bg-ifce px-7 py-7 text-white">
+        <div class="mb-5 flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
+            <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">Protótipo acadêmico</p>
+            <h1 id="demo-login-title" class="text-2xl font-bold tracking-tight">IFCE Memória</h1>
+            <p class="mt-0.5 text-sm text-white/85">Conhecimento que permanece. Gestão que continua.</p>
+          </div>
+        </div>
+        <p class="text-sm leading-relaxed text-white/90">Acesse o ambiente demonstrativo para conhecer os cadernos de funções e o fluxo de transição de responsabilidades.</p>
+      </div>
 
-  <section class="main">
-    <header class="topbar">
-      <div class="top-title"><strong>IFCE Memória</strong><small>Conhecimento institucional organizado e preservado</small></div>
-      <div class="top-actions">
-        <span id="usuario-atual" class="user-pill">Sessão demonstrativa</span>
-        <span id="estado" class="status-pill local">Demonstração local</span>
-        <button id="configurar" class="btn light" title="Conectar o painel aos dados de demonstração disponíveis no Supabase.">⚙ Conectar Supabase</button>
-        <button id="sair" class="btn light" title="Encerrar a sessão demonstrativa e voltar à tela de entrada.">Sair</button>
+      <form id="demo-login-form" class="space-y-4 px-7 py-6" onsubmit="return handleDemoLogin(event)">
+        <div>
+          <label for="demo-username" class="mb-1.5 block text-sm font-semibold text-slate-700">Usuário</label>
+          <input id="demo-username" name="username" type="text" autocomplete="username" placeholder="Digite qualquer usuário" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-ifce focus:ring-4 focus:ring-green-100" required />
+        </div>
+        <div>
+          <label for="demo-password" class="mb-1.5 block text-sm font-semibold text-slate-700">Senha</label>
+          <input id="demo-password" name="password" type="password" autocomplete="current-password" placeholder="Digite qualquer senha" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-ifce focus:ring-4 focus:ring-green-100" required />
+        </div>
+        <div>
+          <label for="demo-role" class="mb-1.5 block text-sm font-semibold text-slate-700">Perfil para demonstração</label>
+          <select id="demo-role" name="role" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-ifce focus:ring-4 focus:ring-green-100">
+            <option>Gestor / responsável atual</option>
+            <option>Servidor sucessor / aprendiz</option>
+            <option>Administrador do sistema</option>
+          </select>
+        </div>
+
+        <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-xs leading-relaxed text-green-900">
+          <p class="font-bold">Acesso rápido para apresentação</p>
+          <p class="mt-1">Usuário: <strong>admin</strong> &nbsp; Senha: <strong>admin</strong></p>
+          <p class="mt-1 text-green-800">Também é possível preencher qualquer outro usuário e senha.</p>
+        </div>
+
+        <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-xl bg-ifce px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-ifce-dark focus:outline-none focus:ring-4 focus:ring-green-100">
+          Entrar no ambiente demonstrativo
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <p class="text-center text-[11px] leading-relaxed text-slate-500">Este login é apenas visual e demonstrativo. Não há autenticação, controle de permissões ou proteção de dados por usuário.</p>
+      </form>
+    </div>
+  </section>
+
+
+  <!-- Container Principal da Aplicação -->
+  <div class="min-h-screen flex flex-col lg:flex-row">
+
+    <!-- =========================================================
+         BARRA LATERAL FIXA (DESKTOP)
+         Exatamente 3 opções de tela: Painel, Cadernos, Transição
+         ========================================================= -->
+    <aside class="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 bg-surface-card border-r border-surface-line z-30">
+      <!-- Identidade Visual -->
+      <div class="p-6 border-b border-surface-line">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-ifce text-white flex items-center justify-center shadow-sm shrink-0">
+            <!-- Ícone geométrico institucional minimalista -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-lg font-bold tracking-tight text-slate-900 leading-tight">IFCE MEMÓRIA</h1>
+            <p class="text-xs font-medium text-ifce truncate">Campus Mombaça</p>
+          </div>
+        </div>
+        <div class="mt-3 px-2.5 py-1.5 rounded-lg bg-ifce-soft border border-ifce-border text-[11px] font-medium text-ifce-dark leading-snug">
+          IFCE • Campus Mombaça
+        </div>
+      </div>
+
+      <!-- Menu de Navegação (Exatamente 3 telas) -->
+      <nav class="flex-1 p-4 space-y-1.5" aria-label="Navegação principal">
+        <button
+          type="button"
+          data-nav="painel"
+          onclick="navigateTo('painel')"
+          class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left"
+        >
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          <span>Painel</span>
+        </button>
+
+        <button
+          type="button"
+          data-nav="cadernos"
+          onclick="navigateTo('cadernos')"
+          class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left"
+        >
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Cadernos de Funções</span>
+        </button>
+
+        <button
+          type="button"
+          data-nav="transicoes"
+          onclick="navigateTo('transicoes')"
+          class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left"
+        >
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          <span>Transição de Funções</span>
+        </button>
+      </nav>
+
+      <!-- Aviso Institucional Discreto -->
+      <div class="p-4 border-t border-surface-line">
+        <div class="rounded-xl bg-slate-50 border border-surface-line p-3.5 text-xs text-slate-600 leading-relaxed">
+          <p class="font-semibold text-slate-700 mb-1">Aviso acadêmico</p>
+          <p>Este aplicativo é um protótipo acadêmico voltado ao IFCE — Campus Mombaça. <strong>Não é um sistema oficial do IFCE.</strong> As rotinas e os registros apresentados são demonstrativos e devem ser validados com as coordenações do campus.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =========================================================
+         CABEÇALHO SUPERIOR COMPACTO (MOBILE E TABLET)
+         ========================================================= -->
+    <header class="lg:hidden sticky top-0 z-30 bg-surface-card border-b border-surface-line shadow-sm">
+      <div class="px-4 py-3 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-ifce text-white flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-slate-900 truncate">IFCE MEMÓRIA</p>
+            <p class="text-[11px] font-medium text-ifce truncate">Campus Mombaça</p>
+          </div>
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
+          <span class="text-[10px] font-medium px-2 py-1 rounded-lg bg-slate-100 text-slate-600 border border-surface-line">Não oficial</span>
+          <button type="button" onclick="demoLogout()" class="rounded-lg border border-surface-line bg-white px-2 py-1.5 text-[10px] font-semibold text-slate-600">Sair</button>
+        </div>
       </div>
     </header>
-    <main class="content">
-      <div id="mensagem"></div>
-      <div id="conteudo"></div>
+
+    <!-- =========================================================
+         ÁREA DE CONTEÚDO PRINCIPAL
+         ========================================================= -->
+    <main class="flex-1 lg:pl-72 flex flex-col min-w-0 pb-24 lg:pb-8">
+      <!-- Faixa superior discreta em desktop reforçando o caráter acadêmico -->
+      <div class="hidden lg:flex items-center justify-between px-8 py-3 bg-surface-card border-b border-surface-line text-xs text-slate-500">
+        <span>IFCE • Campus Mombaça — preservação do conhecimento administrativo local</span>
+        <div class="flex items-center gap-3">
+          <span id="demo-session-label" class="hidden text-[11px] font-semibold text-ifce-dark"></span>
+          <span class="inline-flex items-center gap-1.5 font-medium text-slate-600">
+            <span class="w-2 h-2 rounded-full bg-ifce"></span>
+            Protótipo acadêmico — IFCE Campus Mombaça (não é um sistema oficial do IFCE)
+          </span>
+          <button type="button" onclick="demoLogout()" class="rounded-lg border border-surface-line bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Sair</button>
+        </div>
+      </div>
+
+      <!-- Conteúdo Dinâmico das 3 Telas -->
+      <div id="app-content" class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1">
+        <!-- Renderizado via JavaScript -->
+      </div>
+      <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <p class="text-[11px] text-slate-500 bg-white border border-surface-line rounded-xl px-3 py-2">
+          Escopo local: Campus Mombaça. Os exemplos de atividades, sistemas e prazos são demonstrativos e precisam ser confirmados com cada coordenação.
+        </p>
+      </div>
+
+      <!-- Rodapé discreto mobile -->
+      <footer class="lg:hidden px-4 py-4 text-center text-[11px] text-slate-500 border-t border-surface-line bg-surface-card/70">
+        Protótipo acadêmico — IFCE Campus Mombaça. Não é um sistema oficial. Dados demonstrativos; validar as rotinas com as coordenações.
+      </footer>
     </main>
-  </section>
-</div>
 
-<dialog id="janela">
-  <h2>Conectar ao Supabase</h2>
-  <p>Informe a URL do projeto e somente a chave pública <b>publishable</b> ou a antiga <b>anon</b>. Nunca use <b>service_role</b> ou <b>sb_secret_</b>.</p>
-  <form id="formulario">
-    <label>Project URL<input class="search" name="url" id="url" placeholder="https://seu-projeto.supabase.co" required></label>
-    <label>Chave pública<input class="search" name="chave" id="chave" type="password" placeholder="sb_publishable_..." required></label>
-    <div class="dialog-actions">
-      <button type="button" id="desconectar" class="btn light">Modo demonstração</button>
-      <button type="button" id="fechar" class="btn light">Cancelar</button>
-      <button type="submit" id="enviar" class="btn">Conectar e carregar</button>
+    <!-- =========================================================
+         BARRA DE NAVEGAÇÃO INFERIOR COMPACTA (MOBILE E TABLET)
+         ========================================================= -->
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-surface-card border-t border-surface-line shadow-lg" aria-label="Navegação mobile">
+      <div class="grid grid-cols-3 h-16">
+        <button
+          type="button"
+          data-nav-mobile="painel"
+          onclick="navigateTo('painel')"
+          class="nav-mobile-item flex flex-col items-center justify-center gap-1 px-1 text-xs font-medium transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          <span>Painel</span>
+        </button>
+
+        <button
+          type="button"
+          data-nav-mobile="cadernos"
+          onclick="navigateTo('cadernos')"
+          class="nav-mobile-item flex flex-col items-center justify-center gap-1 px-1 text-xs font-medium transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Cadernos</span>
+        </button>
+
+        <button
+          type="button"
+          data-nav-mobile="transicoes"
+          onclick="navigateTo('transicoes')"
+          class="nav-mobile-item flex flex-col items-center justify-center gap-1 px-1 text-xs font-medium transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          <span>Transição</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- =========================================================
+       CONTAINER DE MODAIS (Visualizar, Formulários, Confirmação)
+       ========================================================= -->
+  <div
+    id="modal-backdrop"
+    class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4 overflow-y-auto"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      id="modal-container"
+      class="bg-surface-card rounded-2xl shadow-xl border border-surface-line w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
+    >
+      <!-- Conteúdo do modal injetado dinamicamente -->
     </div>
-  </form>
-</dialog>
-
-<dialog id="caderno-dialog">
- <div id="caderno-dialog-content"></div>
-</dialog>
-
-<script>
-'use strict';
-
-const $ = id => document.getElementById(id);
-const h = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const norm = value => String(value ?? '').toLocaleLowerCase('pt-BR');
-const dateBR = value => value ? new Date(value.length===10 ? value+'T12:00:00' : value).toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza'}) : '—';
-
-const CAMPUS = [
- ['c1','Campus Mombaça','Mombaça'],['c2','Campus Fortaleza','Fortaleza'],
- ['c3','Campus Sobral','Sobral'],['c4','Reitoria','Fortaleza']
-].map(([id,name,city])=>({id,name,city}));
-
-const CADERNOS = [
- ['n1','c1','Coordenação Administrativa','Administração','Ana Beatriz Lima'],
- ['n2','c1','Tecnologia da Informação','TI','Bruno Almeida'],
- ['n3','c1','Almoxarifado','Administração','Carlos Eduardo Nunes'],
- ['n4','c2','Coordenação de Curso','Ensino','Camila Sousa'],
- ['n5','c2','Controle Acadêmico','Ensino','Rafael Ferreira'],
- ['n6','c3','Coordenação de Extensão','Extensão','Lívia Martins'],
- ['n7','c4','Gestão de Pessoas','Gestão de Pessoas','Juliana Rocha'],
- ['n8','c4','Diretoria de Administração','Administração','Paulo Henrique Costa']
-].map(([id,campus_id,function_name,sector,responsible_name])=>({
- id,campus_id,function_name,sector,responsible_name,status:'active',
- description:`Gestão das rotinas da função ${function_name}.`,
- responsibilities:['Organizar processos','Compartilhar conhecimento','Acompanhar atividades']
-}));
-
-const PROCEDIMENTOS = [
- ['n1','Tramitação de processos administrativos','Sob demanda'],
- ['n1','Organização do arquivo setorial','Mensal'],
- ['n2','Atendimento de chamados técnicos','Sob demanda'],
- ['n2','Inventário de equipamentos','Semestral'],
- ['n3','Recebimento de materiais','Sob demanda'],
- ['n3','Controle de estoque','Semanal'],
- ['n4','Planejamento acadêmico','Semestral'],
- ['n5','Emissão de documentos acadêmicos','Sob demanda'],
- ['n6','Acompanhamento de projetos de extensão','Mensal'],
- ['n7','Instrução de processos funcionais','Sob demanda'],
- ['n8','Acompanhamento de contratos','Mensal'],
- ['n8','Acompanhamento de solicitações de compras','Sob demanda']
-].map(([notebook_id,title,frequency],i)=>({
- id:'p'+(i+1),notebook_id,title,frequency,category:'Procedimento',
- objective:`Orientar a execução de ${title.toLowerCase()}.`,
- steps:['Receber a demanda','Conferir as informações','Registrar e encaminhar a atividade']
-}));
-
-const DOCUMENTOS = PROCEDIMENTOS.map((p,i)=>({
- id:'d'+(i+1),notebook_id:p.notebook_id,procedure_id:p.id,
- title:'Modelo demonstrativo: '+p.title,
- description:'Documento catalogado para fins didáticos.',storage_path:null
-}));
-
-const TRANSICOES = [
- ['t1','n1','Ana Beatriz Lima','Marina Costa','in_progress',40,'2026-11-10'],
- ['t2','n2','Bruno Almeida','Pedro Henrique','awaiting_successor',60,'2026-11-09'],
- ['t3','n3','Carlos Eduardo Nunes','Fernanda Alves','awaiting_approval',80,'2026-11-07'],
- ['t4','n4','Camila Sousa','Lucas Mendes','completed',100,'2026-11-01']
-].map(([id,notebook_id,outgoing_responsible,incoming_responsible,status,progress,started_at])=>({
- id,notebook_id,outgoing_responsible,incoming_responsible,status,progress,started_at,
- notes:'Transição demonstrativa para fins acadêmicos.'
-}));
-
-const ETAPAS=['Atualizar o caderno da função','Revisar procedimentos','Organizar documentos','Orientar o sucessor','Validar a transferência'];
-const CHECKLISTS=TRANSICOES.flatMap((t,i)=>ETAPAS.map((title,j)=>({
- id:t.id+'-'+j,transition_id:t.id,title,sort_order:j+1,is_completed:j<[2,3,4,5][i]
-})));
-const ATIVIDADES=TRANSICOES.flatMap((t,i)=>Array.from({length:[3,4,5,6][i]},(_,j)=>({
- id:t.id+'a'+j,notebook_id:t.notebook_id,transition_id:t.id,
- actor_name:t.outgoing_responsible,
- event_type:j===0?'transition_started':(j===[2,3,4,5][i]&&i===3?'transition_completed':'notebook_updated'),
- description:j===0?'Transição de responsabilidade iniciada.':(i===3&&j===5?'Transição concluída e validada.':'Registro de conhecimento atualizado.'),
- created_at:`2026-11-${String(12-i-j).padStart(2,'0')}T15:00:00-03:00`
-})));
-
-const demo={campuses:CAMPUS,notebooks:CADERNOS,procedures:PROCEDIMENTOS,documents:DOCUMENTOS,transitions:TRANSICOES,checklists:CHECKLISTS,activities:ATIVIDADES};
-const LOCAL_CADERNOS_KEY='ifce_memoria_cadernos_locais_v1';
-function lerCadernosLocais(){
- try{const value=JSON.parse(localStorage.getItem(LOCAL_CADERNOS_KEY)||'[]');return Array.isArray(value)?value:[];}
- catch(e){return [];}
-}
-function combinarCadernos(base){
- const map=new Map((base||[]).map(n=>[String(n.id),n]));
- lerCadernosLocais().forEach(n=>map.set(String(n.id),{...(map.get(String(n.id))||{}),...n}));
- return [...map.values()];
-}
-function salvarCadernoLocal(caderno){
- const atuais=lerCadernosLocais().filter(n=>String(n.id)!==String(caderno.id));
- atuais.push(caderno);
- localStorage.setItem(LOCAL_CADERNOS_KEY,JSON.stringify(atuais));
-}
-
-// ARQUIVOS E CONFIRMAÇÕES: armazenamento exclusivamente local neste navegador.
-// Os PDFs ficam no IndexedDB; metadados e confirmações ficam no localStorage.
-// Nada deste bloco envia arquivos ou confirmações ao Supabase.
-const LOCAL_DOCUMENT_META_KEY='ifce_memoria_documentos_meta_v1';
-const LOCAL_SIGNATURES_KEY='ifce_memoria_assinaturas_v1';
-const LOCAL_FILES_DB='ifce_memoria_arquivos_v1';
-let documentObjectUrls=[];
-
-function lerMetadadosDocumentos(){
- try{return JSON.parse(localStorage.getItem(LOCAL_DOCUMENT_META_KEY)||'{}')||{};}
- catch(e){return {};}
-}
-function salvarMetadadoDocumento(id,meta){
- const all=lerMetadadosDocumentos();
- all[String(id)]=meta;
- localStorage.setItem(LOCAL_DOCUMENT_META_KEY,JSON.stringify(all));
-}
-function removerMetadadoDocumento(id){
- const all=lerMetadadosDocumentos();
- delete all[String(id)];
- localStorage.setItem(LOCAL_DOCUMENT_META_KEY,JSON.stringify(all));
-}
-function metadadoDocumento(id){return lerMetadadosDocumentos()[String(id)]||null;}
-
-function abrirBancoArquivos(){
- return new Promise((resolve,reject)=>{
-  if(!('indexedDB' in window)){reject(new Error('Este navegador não oferece armazenamento local de arquivos.'));return;}
-  const request=indexedDB.open(LOCAL_FILES_DB,1);
-  request.onupgradeneeded=()=>{
-   const db=request.result;
-   if(!db.objectStoreNames.contains('pdfs'))db.createObjectStore('pdfs',{keyPath:'id'});
-  };
-  request.onsuccess=()=>resolve(request.result);
-  request.onerror=()=>reject(request.error||new Error('Não foi possível abrir o armazenamento local.'));
- });
-}
-async function guardarPdfLocal(id,file){
- const db=await abrirBancoArquivos();
- return new Promise((resolve,reject)=>{
-  const tx=db.transaction('pdfs','readwrite');
-  tx.objectStore('pdfs').put({id:String(id),name:file.name,type:'application/pdf',size:file.size,updatedAt:new Date().toISOString(),blob:file});
-  tx.oncomplete=()=>{db.close();resolve();};
-  tx.onerror=()=>{const error=tx.error;db.close();reject(error||new Error('Falha ao salvar o PDF.'));};
-  tx.onabort=()=>{const error=tx.error;db.close();reject(error||new Error('Armazenamento local indisponível ou sem espaço.'));};
- });
-}
-async function obterPdfLocal(id){
- const db=await abrirBancoArquivos();
- return new Promise((resolve,reject)=>{
-  const tx=db.transaction('pdfs','readonly');
-  const request=tx.objectStore('pdfs').get(String(id));
-  request.onsuccess=()=>{const result=request.result||null;db.close();resolve(result);};
-  request.onerror=()=>{const error=request.error;db.close();reject(error||new Error('Não foi possível ler o PDF.'));};
- });
-}
-async function apagarPdfLocal(id){
- const db=await abrirBancoArquivos();
- return new Promise((resolve,reject)=>{
-  const tx=db.transaction('pdfs','readwrite');
-  tx.objectStore('pdfs').delete(String(id));
-  tx.oncomplete=()=>{db.close();resolve();};
-  tx.onerror=()=>{const error=tx.error;db.close();reject(error||new Error('Não foi possível remover o PDF.'));};
- });
-}
-function revogarPreviewsDocumentos(){
- documentObjectUrls.forEach(url=>URL.revokeObjectURL(url));
- documentObjectUrls=[];
-}
-async function carregarPreviewsDocumentos(){
- const containers=[...document.querySelectorAll('[data-document-preview]')];
- for(const container of containers){
-  try{
-   const record=await obterPdfLocal(container.dataset.documentPreview);
-   if(!container.isConnected)continue;
-   if(!record?.blob){container.textContent='Arquivo não encontrado neste navegador. Anexe o PDF novamente.';continue;}
-   const url=URL.createObjectURL(record.blob);
-   documentObjectUrls.push(url);
-   const frame=document.createElement('iframe');
-   frame.className='pdf-preview-frame';
-   frame.src=url;
-   frame.title='Pré-visualização do arquivo '+record.name;
-   container.replaceChildren(frame);
-  }catch(error){
-   if(container.isConnected)container.textContent='Não foi possível carregar a pré-visualização. Você ainda pode tentar baixar o arquivo.';
-  }
- }
-}
-function lerAssinaturasLocais(){
- try{return JSON.parse(localStorage.getItem(LOCAL_SIGNATURES_KEY)||'{}')||{};}
- catch(e){return {};}
-}
-function assinaturasDaTransicao(id){return lerAssinaturasLocais()[String(id)]||{};}
-function salvarConfirmacaoLocal(transitionId,role,name){
- const all=lerAssinaturasLocais();
- const current=all[String(transitionId)]||{};
- if(current[role])return false;
- current[role]={name,at:new Date().toISOString()};
- all[String(transitionId)]=current;
- localStorage.setItem(LOCAL_SIGNATURES_KEY,JSON.stringify(all));
- return true;
-}
-function transitionStatus(t){
- const sig=assinaturasDaTransicao(t.id);
- if(sig.outgoing&&sig.incoming)return 'completed';
- if(sig.outgoing)return 'awaiting_successor';
- if(sig.incoming)return 'awaiting_approval';
- return 'in_progress';
-}
-let banco={...demo,notebooks:combinarCadernos(CADERNOS)},pagina='dashboard',detalhe=null,pesquisa='',conectado=false,erro='',feedback='',configuracao=null,usuarioDemo=null;
-
-const campusName=id=>banco.campuses.find(x=>x.id===id)?.name||'Unidade não identificada';
-const notebook=id=>banco.notebooks.find(x=>x.id===id);
-const unidade=n=>campusName(n?.campus_id);
-const cadernoNome=id=>{const n=notebook(id);return n?`${n.function_name} • ${unidade(n)}`:'Função não identificada';};
-const statusName=s=>({in_progress:'Em andamento',awaiting_successor:'Aguardando sucessor',awaiting_approval:'Aguardando validação',completed:'Concluída',draft:'Rascunho',cancelled:'Cancelada'}[s]||s||'Não informado');
-const badge=s=>`<span class="badge ${s==='completed'?'green':s==='in_progress'?'orange':s==='awaiting_approval'?'blue':''}">${h(statusName(s))}</span>`;
-const checklistOf=id=>banco.checklists.filter(x=>x.transition_id===id);
-const progressOf=t=>{const sig=assinaturasDaTransicao(t.id);return (sig.outgoing?50:0)+(sig.incoming?50:0);};
-function helpTip(text){return `<span class="help-tip" tabindex="0" role="img" aria-label="${h(text)}" data-tip="${h(text)}">?</span>`;}
-const pageHelp={
- 'Visão geral':'Resumo dos cadernos, procedimentos e transferências cadastrados.',
- 'Funções':'Cada caderno reúne as informações importantes de uma função ou área.',
- 'Procedimentos':'Mostra, em etapas simples, como uma atividade deve ser realizada.',
- 'Transições':'Acompanhe a entrega do conhecimento quando uma pessoa deixa a função e outra assume.',
- 'Transição de responsabilidade':'Veja quem entrega, quem recebe e quais etapas precisam ser concluídas.'
-};
-const pageTitle=(eyebrow,title,desc)=>`<div class="page-head"><div><div class="eyebrow">${h(eyebrow)}</div><h1>${h(title)} ${helpTip(pageHelp[title]||desc)}</h1><p>${h(desc)}</p></div></div>`;
-const searchBox=placeholder=>`<div class="search-row"><input id="pesquisa" class="search" placeholder="${h(placeholder)}" aria-label="Pesquisar"></div>`;
-
-function metric(label,value,note,icon,target){
- return `<button class="metric" data-pagina="${target}"><div class="metric-top"><span>${h(label)}</span><span class="metric-icon">${icon}</span></div><div class="metric-value">${value}</div><div class="metric-note">${h(note)}</div></button>`;
-}
-
-function statusChart(){
- const groups=[
-  {key:'completed',label:'Concluídas',color:'#18a66b'},
-  {key:'in_progress',label:'Em andamento',color:'#e6a23c'},
-  {key:'awaiting_successor',label:'Aguardando sucessor',color:'#4b91cf'},
-  {key:'awaiting_approval',label:'Aguardando validação',color:'#9271c7'}
- ];
- const counts=groups.map(g=>({...g,count:banco.transitions.filter(t=>notebookVisivel(t.notebook_id)&&transitionStatus(t)===g.key).length}));
- const total=counts.reduce((s,g)=>s+g.count,0);
- let offset=0;
- const segments=counts.map(g=>{
-  const start=offset;offset+=total?g.count/total*100:0;
-  return `${g.color} ${start}% ${offset}%`;
- });
- const bg=total?`conic-gradient(${segments.join(',')})`:'#e7eee9';
- return `<div class="donut-layout">
-  <div class="donut" style="background:${bg}"><div class="donut-center"><strong>${total}</strong><span>transições</span></div></div>
-  <div class="legend">${counts.map(g=>`<div class="legend-row"><span class="legend-name"><i class="legend-dot" style="background:${g.color}"></i>${h(g.label)}</span><b>${g.count}</b></div>`).join('')}</div>
- </div>`;
-}
-
-function campusChart(){
- const counts=banco.campuses.map(c=>({name:c.name,count:banco.notebooks.filter(n=>notebookVisivel(n.id)&&n.campus_id===c.id).length})).filter(x=>x.count>0);
- const max=Math.max(1,...counts.map(x=>x.count));
- if(!counts.length)return '<div class="empty">Nenhuma função cadastrada.</div>';
- return `<div class="bar-list">${counts.map(x=>`<div class="bar-row"><span class="bar-name" title="${h(x.name)}">${h(x.name)}</span><div class="bar-track"><div class="bar-fill" style="width:${x.count/max*100}%"></div></div><b class="bar-number">${x.count}</b></div>`).join('')}</div>`;
-}
-
-
-function notebookVisivel(notebookId){
- if(!usuarioDemo||usuarioDemo.admin)return true;
- return String(notebookId)===String(usuarioDemo.notebookId);
-}
-function renderLogin(){
- const options=banco.notebooks.map(n=>`<option value="${h(n.id)}">${h(n.function_name)} — ${h(unidade(n))}</option>`).join('');
- return `<section class="login-card">
-  <div class="login-brand"><div class="brand-mark">IF</div><div><strong>IFCE Memória</strong><small style="display:block;color:var(--muted);font-size:10px;margin-top:3px">Gestão do conhecimento</small></div></div>
-  <div class="eyebrow">ACESSO AO AMBIENTE</div>
-  <h1>Entrar no IFCE Memória</h1>
-  <p>Informe seus dados e selecione o caderno da sua área.</p>
-  <form id="login-form">
-   <label>Nome ou e-mail<input name="usuario" autocomplete="username" placeholder="Digite qualquer nome ou e-mail" required></label>
-   <label>Senha<input name="senha" type="password" autocomplete="current-password" placeholder="Digite qualquer senha" required></label>
-   <label>Seu caderno / área de trabalho
-    <select name="area" required>
-     <option value="" selected disabled>Selecione sua área</option>
-     <option value="*">Administrador — visualizar todos os cadernos</option>
-     ${options}
-    </select>
-   </label>
-   <button class="btn" type="submit">Entrar no sistema →</button>
-  </form>
-  <div class="login-demo-note"><b>Modo de demonstração:</b> qualquer nome/e-mail e qualquer senha serão aceitos. A escolha da área apenas filtra o que aparece na tela. Este acesso não autentica servidores nem protege os dados; não deve ser usado com informações reais.</div>
- </section>`;
-}
-
-function renderDashboard(){
- const notebooksVisiveis=banco.notebooks.filter(n=>notebookVisivel(n.id));
- const proceduresVisiveis=banco.procedures.filter(p=>notebookVisivel(p.notebook_id));
- const transitionsVisiveis=banco.transitions.filter(t=>notebookVisivel(t.notebook_id));
- const transitionIds=new Set(transitionsVisiveis.map(t=>t.id));
- const pendencias=transitionsVisiveis.reduce((total,t)=>{const sig=assinaturasDaTransicao(t.id);return total+(sig.outgoing?0:1)+(sig.incoming?0:1);},0);
- const ativos=transitionsVisiveis.filter(t=>transitionStatus(t)!=='completed').length;
- const recent=banco.activities.filter(a=>notebookVisivel(a.notebook_id)).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
- const trans=[...transitionsVisiveis].sort((a,b)=>new Date(b.started_at)-new Date(a.started_at)).slice(0,4);
- return pageTitle('PAINEL DE CONTROLE','Visão geral','Acompanhe o conhecimento institucional e as transferências em um só lugar.')+
- `<div class="quick-actions">
-  <button class="quick" data-pagina="cadernos" title="Abra o caderno da sua área para consultar as informações da função.">＋ Consultar funções</button>
-  <button class="quick" data-pagina="procedimentos" title="Consulte as instruções para executar as atividades da sua área.">▣ Ver procedimentos</button>
-  <button class="quick" data-pagina="transicoes" title="Veja as transferências de responsabilidade relacionadas à sua área.">⇄ Acompanhar transições</button>
- </div>
- <div class="metrics">
-  ${metric('Funções registradas',notebooksVisiveis.length,'Cadernos de funções','▤','cadernos')}
-  ${metric('Procedimentos',proceduresVisiveis.length,'Rotinas documentadas','▣','procedimentos')}
-  ${metric('Transições ativas',ativos,`De ${transitionsVisiveis.length} cadastradas`,'⇄','transicoes')}
-  ${metric('Confirmações pendentes',pendencias,'Entrega e recebimento','◷','transicoes')}
- </div>
- <div class="panel-grid">
-  <section class="panel"><div class="panel-head"><h3>Situação das transferências ${helpTip('Mostra quantas transferências estão concluídas, em andamento ou aguardando confirmação.')}</h3><small>Distribuição por situação</small></div>${statusChart()}</section>
-  <section class="panel"><div class="panel-head"><h3>Funções por unidade ${helpTip('Quantidade de cadernos vinculados a cada campus ou unidade.')}</h3><small>Cadernos cadastrados</small></div>${campusChart()}</section>
- </div>
- <div class="lower-grid">
-  <section class="panel"><div class="panel-head"><h3>Transferências recentes ${helpTip('Lista as passagens de responsabilidade mais recentes da área selecionada.')}</h3><button class="text-link" data-pagina="transicoes">Ver todas →</button></div>
-   ${trans.length?trans.map(t=>`<div class="transition-item"><div class="item-title"><strong>${h(notebook(t.notebook_id)?.function_name||'Função')}</strong>${badge(transitionStatus(t))}</div><div class="item-meta">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)} · ${h(unidade(notebook(t.notebook_id)))}</div><div class="progress"><span style="width:${progressOf(t)}%"></span></div><div class="item-meta">${progressOf(t)}% das etapas concluídas</div></div>`).join(''):'<div class="empty">Nenhuma transferência cadastrada.</div>'}
-  </section>
-  <section class="panel"><div class="panel-head"><h3>Atividades recentes ${helpTip('Mostra registros de atividade relacionados à área selecionada.')}</h3><small>Últimos registros</small></div>
-   ${recent.length?recent.map(a=>`<div class="activity"><span class="activity-dot"></span><div class="activity-body"><strong>${h(a.actor_name||'Servidor')}</strong><p>${h(a.description)}<br>${h(cadernoNome(a.notebook_id))} · ${h(dateBR(a.created_at))}</p></div></div>`).join(''):'<div class="empty">Nenhuma atividade registrada.</div>'}
-  </section>
- </div>`;
-}
-
-function renderCadernos(){
- const rows=banco.notebooks.filter(n=>notebookVisivel(n.id)&&[n.function_name,n.sector,unidade(n),n.responsible_name].some(x=>norm(x).includes(norm(pesquisa))));
- const createButton=usuarioDemo?.admin?'<button class="btn" data-caderno-novo>＋ Criar novo caderno</button>':'';
- const intro=usuarioDemo?.admin
-  ? 'Como administrador, você pode criar cadernos e consultar todos os registros.'
-  : 'Este é o caderno da sua área. Você pode consultar e atualizar as informações da função.';
- return pageTitle('MEMÓRIA INSTITUCIONAL','Funções','Cada função tem seu próprio caderno, preservando as rotinas mesmo quando o responsável muda.')+
- `<div class="management-toolbar"><span class="muted">${h(intro)}</span>${createButton}</div>
- <div class="management-note">As alterações feitas nesta demonstração ficam salvas somente neste navegador. Elas não são gravadas no Supabase nem compartilhadas com outros computadores.</div>`+
- searchBox('Pesquisar função, campus, setor ou responsável...')+
- (rows.length?`<div class="cards">${rows.map(n=>`<button class="data-card clickable" data-abrir="caderno" data-id="${h(n.id)}" title="Abra este caderno para consultar e editar as informações desta função.">
-  <div class="eyebrow">${h(unidade(n))}</div><h3>${h(n.function_name)}</h3><p>${h(n.sector)}</p>
-  <div class="card-footer"><small>Responsável: ${h(n.responsible_name||'Não informado')}</small><span class="badge green">Ver caderno →</span></div>
- </button>`).join('')}</div>`:'<div class="empty">Nenhuma função encontrada.</div>');
-}
-function renderProcedimentos(){
- const rows=banco.procedures.filter(p=>notebookVisivel(p.notebook_id)&&[p.title,p.category,cadernoNome(p.notebook_id)].some(x=>norm(x).includes(norm(pesquisa))));
- return pageTitle('ROTINAS DE TRABALHO','Procedimentos','Consulte como as atividades são realizadas e quais documentos apoiam cada rotina.')+
- searchBox('Pesquisar procedimento ou função...')+
- (rows.length?`<div class="cards">${rows.map(p=>{
-  const docs=banco.documents.filter(d=>d.procedure_id===p.id).length;
-  return `<button class="data-card clickable" data-abrir="procedimento" data-id="${h(p.id)}" title="Abra para ver o objetivo, a frequência, as etapas e os documentos de apoio desta rotina.">
-   <div class="eyebrow">${h(cadernoNome(p.notebook_id))}</div><h3>${h(p.title)}</h3>
-   <p>Frequência: ${h(p.frequency||'Não informada')}</p>
-   <div class="card-footer"><small>${docs} documento(s) associado(s)</small><span class="badge green">Consultar →</span></div>
-  </button>`;
- }).join('')}</div>`:'<div class="empty">Nenhum procedimento encontrado.</div>');
-}
-
-function renderTransicoes(){
- const rows=banco.transitions.filter(t=>notebookVisivel(t.notebook_id)&&[t.outgoing_responsible,t.incoming_responsible,cadernoNome(t.notebook_id),statusName(transitionStatus(t))].some(x=>norm(x).includes(norm(pesquisa))));
- return pageTitle('CONTINUIDADE INSTITUCIONAL','Transições','Acompanhe a passagem de conhecimento entre quem deixa a função e quem assume.')+
- searchBox('Pesquisar função, servidor ou situação...')+
- (rows.length?`<div class="cards">${rows.map(t=>`<button class="data-card clickable" data-abrir="transicao" data-id="${h(t.id)}" title="Abra para acompanhar o que está sendo entregue e recebido na mudança de responsável.">
-  <div class="item-title"><span class="eyebrow">${h(unidade(notebook(t.notebook_id)))}</span>${badge(transitionStatus(t))}</div>
-  <h3>${h(notebook(t.notebook_id)?.function_name||'Função')}</h3>
-  <p>${h(t.outgoing_responsible)} <b>→</b> ${h(t.incoming_responsible)}</p>
-  <div class="progress"><span style="width:${progressOf(t)}%"></span></div>
-  <div class="card-footer"><small>${progressOf(t)}% concluído · Início ${dateBR(t.started_at)}</small><span class="badge green">Abrir →</span></div>
- </button>`).join('')}</div>`:'<div class="empty">Nenhuma transição encontrada.</div>');
-}
-
-function renderSignatures(t){
- const sig=assinaturasDaTransicao(t.id);
- const signedAt=value=>value?.at?new Date(value.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'';
- const signatureCard=(role,label,name,record,buttonLabel)=>{
-  const signed=Boolean(record);
-  return `<div class="signature-card ${signed?'':'signature-pending'}">
-   <div class="signature-role">${label}</div>
-   <div class="signature-name">${h(name||'Responsável não informado')}</div>
-   <div class="signature-mark">${signed?h(record.name||name):'Aguardando confirmação'}</div>
-   <div class="signature-status"><b>${signed?'Confirmação registrada':'Aguardando confirmação'}</b><br>${signed?`Registro demonstrativo · ${h(signedAt(record))}`:'Esta parte ainda não confirmou.'}</div>
-   ${signed?'':`<button type="button" class="btn signature-confirm" data-confirmar-transicao="${h(t.id)}" data-papel="${role}">${buttonLabel}</button>`}
-  </div>`;
- };
- const done=Boolean(sig.outgoing&&sig.incoming);
- return `<section class="detail-panel signature-section">
-  <h3>Confirmação das duas partes ${helpTip('A pessoa que deixa a função confirma a entrega. A pessoa que assume confirma o recebimento. A transferência só termina depois das duas confirmações.')}</h3>
-  <p class="muted">Primeiro confirme a entrega; depois confirme o recebimento. As duas etapas podem ser demonstradas nesta tela.</p>
-  <div class="signature-grid">
-   ${signatureCard('outgoing','Responsável anterior · entrega',t.outgoing_responsible,sig.outgoing,'Confirmar entrega')}
-   ${signatureCard('incoming','Novo responsável · recebimento',t.incoming_responsible,sig.incoming,'Confirmar recebimento')}
   </div>
-  ${done?'<div class="notice" style="margin-top:12px;margin-bottom:0"><b>Transferência concluída!</b> As duas confirmações demonstrativas foram registradas.</div>':'<div class="document-note">A transferência permanece em andamento até que as duas partes confirmem.</div>'}
-  <div class="signature-disclaimer"><b>Assinaturas simuladas para demonstração.</b> Os botões registram localmente o nome associado a cada papel. Não verificam a identidade dos servidores, não usam certificado digital e não têm validade jurídica. Os registros ficam somente neste navegador.</div>
- </section>`;
-}
 
-function renderDetail(){
- const {tipo,id}=detalhe;
- const back='<button class="btn light detail-back" data-acao="voltar">← Voltar</button>';
- if(tipo==='caderno'){
-  const n=notebook(id);if(!n)return back+'Registro não encontrado.';if(!notebookVisivel(id))return back+'Este caderno não pertence à área selecionada neste acesso demonstrativo.';
-  const ps=banco.procedures.filter(p=>p.notebook_id===id);
-  const ts=banco.transitions.filter(t=>t.notebook_id===id);
-  return back+pageTitle('CADERNO DA FUNÇÃO',n.function_name,`${unidade(n)} · ${n.sector}`)+
-  `<div class="quick-actions"><button class="btn" data-caderno-editar="${h(n.id)}">✎ Editar informações do caderno</button></div>
-  <div class="management-note">As informações deste caderno podem ser atualizadas nesta demonstração. As alterações ficam salvas somente neste navegador.</div>
-  <div class="detail-grid">
-   <section class="detail-panel"><h3>Identificação ${helpTip('Dados básicos da função, incluindo campus, setor e responsável.')}</h3><p><b>Responsável:</b> ${h(n.responsible_name||'Não informado')}</p><p><b>Situação:</b> ${h(n.status||'—')}</p><p>${h(n.description||'Registro da função.')}</p></section>
-   <section class="detail-panel"><h3>Responsabilidades principais ${helpTip('Resumo do que a pessoa responsável por esta função precisa realizar.')}</h3>${(n.responsibilities||[]).map(x=>`<div class="check-row"><span class="check-symbol">✓</span><div>${h(x)}</div></div>`).join('')||'<p>Não registradas.</p>'}</section>
-  </div>
-  <section class="detail-panel"><h3>Procedimentos desta função (${ps.length})</h3>${ps.map(p=>`<div class="check-row"><span class="check-symbol">▣</span><div><button class="text-link" data-abrir="procedimento" data-id="${h(p.id)}">${h(p.title)}</button><div class="muted">${h(p.frequency||'')}</div></div></div>`).join('')||'<p>Nenhum procedimento associado.</p>'}</section>
-  <section class="detail-panel" style="margin-top:14px"><h3>Transições relacionadas (${ts.length})</h3>${ts.map(t=>`<div class="check-row"><span class="check-symbol">⇄</span><div><button class="text-link" data-abrir="transicao" data-id="${h(t.id)}">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)}</button><div class="muted">${h(statusName(transitionStatus(t)))}</div></div></div>`).join('')||'<p>Nenhuma transição associada.</p>'}</section>`;
- }
- if(tipo==='procedimento'){
-  const p=banco.procedures.find(x=>x.id===id);if(!p)return back+'Registro não encontrado.';if(!notebookVisivel(p.notebook_id))return back+'Este procedimento não pertence à área selecionada neste acesso demonstrativo.';
-  const docs=banco.documents.filter(d=>d.procedure_id===id);
-  const etapas=p.steps||[];
-  const isTramitacao=norm(p.title).includes('tramitação')||norm(p.title).includes('processos administrativos');
-  const textoEtapa=s=>typeof s==='string'?s:(s.description||s.title||s.name||'Etapa');
-  const explicacaoEtapa=(s,i)=>{
-   if(s&&typeof s==='object'&&(s.details||s.instructions||s.explanation))return s.details||s.instructions||s.explanation;
-   if(isTramitacao){
-    return [
-     'Registre a data de recebimento, identifique quem solicitou e anote o assunto da demanda.',
-     'Confira se as informações estão completas e se os documentos necessários foram apresentados. Se faltar algo, solicite a complementação.',
-     'Formalize o registro e encaminhe o processo ao setor responsável, anotando o destino e a data.'
-    ][i]||'Execute a atividade, registre o que foi feito e informe o próximo responsável, quando necessário.';
-   }
-   return [
-    'Identifique a demanda e confirme o que precisa ser realizado nesta etapa.',
-    'Confira as informações e os documentos necessários antes de continuar.',
-    'Registre a execução e encaminhe a atividade para a próxima etapa, quando necessário.'
-   ][i]||'Conclua a atividade e registre as informações importantes para consulta futura.';
-  };
-  const etapasHTML=etapas.map((s,i)=>{
-   const label=textoEtapa(s);
-   const explain=explicacaoEtapa(s,i);
-   const panelId='explicacao-etapa-'+i;
-   return `<div class="step-item">
-    <button type="button" class="step-trigger" data-step-toggle="${i}" title="${h(explain)}" aria-expanded="false" aria-controls="${panelId}">
-     <span class="step-number">${i+1}</span><span class="step-label">${h(label)}</span><span class="step-chevron">⌄</span>
-    </button>
-    <div class="step-explain" id="${panelId}" hidden><b>O que fazer:</b> ${h(explain)}</div>
-   </div>`;
-  }).join('');
-  const documentosHTML=docs.map((d,index)=>{
-   const demoChecklist=isTramitacao&&!d.storage_path;
-   const titulo=demoChecklist?'Checklist de tramitação de processos':d.title;
-   const meta=metadadoDocumento(d.id);
-   const nomeExibido=meta?.name||titulo;
-   const previewTitle=demoChecklist?'CHECKLIST DE TRAMITAÇÃO DE PROCESSOS':String(titulo||'DOCUMENTO INSTITUCIONAL').toLocaleUpperCase('pt-BR');
-   const previewSubtitle=demoChecklist?'Roteiro demonstrativo para tramitação de processos administrativos':'Pré-visualização ilustrativa do documento associado ao procedimento';
-   const previewBody=demoChecklist
-    ? `<div class="preview-section-title">Conferência da documentação</div>
-       <div class="preview-check"><span class="preview-box"></span><span>Verificar se o processo contém identificação do solicitante e assunto da demanda.</span></div>
-       <div class="preview-check"><span class="preview-box"></span><span>Conferir se as informações e os documentos necessários estão completos.</span></div>
-       <div class="preview-check"><span class="preview-box"></span><span>Registrar o encaminhamento ao setor responsável, com destino e data.</span></div>
-       <div class="preview-section-title">Registro de encaminhamento</div>
-       <div class="preview-meta"><div><b>Responsável:</b><br>Servidor responsável pelo recebimento</div><div><b>Data:</b><br>___ / ___ / ______</div><div><b>Setor de destino:</b><br>________________________</div><div><b>Número do processo:</b><br>________________________</div></div>`
-    : `<div class="preview-section-title">Informações do documento</div>
-       <div class="preview-check"><span class="preview-box"></span><span>Documento relacionado ao procedimento “${h(p.title)}”.</span></div>
-       <div class="preview-check"><span class="preview-box"></span><span>Conteúdo demonstrativo para consulta na apresentação do protótipo.</span></div>
-       <div class="preview-section-title">Orientação</div>
-       <p style="font-size:9px;line-height:1.7;color:#53685d">Este espaço representa a visualização online do arquivo que poderá ser disponibilizado no sistema institucional.</p>`;
-   const localPreview=meta
-    ? `<div class="document-preview-label"><span>Pré-visualização do PDF anexado</span><span>Salvo neste navegador</span></div><div class="pdf-preview-container" data-document-preview="${h(d.id)}">Carregando PDF...</div>`
-    : `<div class="document-preview-label"><span>Exemplo de documento</span><span>Modelo ilustrativo</span></div>
-       <div class="document-preview ${demoChecklist?'':'preview-generic'}" role="img" aria-label="Pré-visualização ilustrativa de ${h(titulo)}">
-        <div class="preview-top">
-         <div class="preview-brand"><span class="preview-mark">IF</span><span><strong>INSTITUTO FEDERAL</strong><small>Educação, Ciência e Tecnologia do Ceará</small></span></div>
-         <span class="preview-stamp">MODELO<br>DEMONSTRATIVO</span>
+  <!-- =========================================================
+       CONTAINER DE NOTIFICAÇÕES DISCRETAS (TOAST)
+       ========================================================= -->
+  <div
+    id="toast-container"
+    class="fixed top-4 right-4 lg:top-auto lg:bottom-6 lg:right-6 z-50 flex flex-col gap-2 max-w-sm w-[calc(100%-2rem)] pointer-events-none"
+    aria-live="polite"
+  ></div>
+
+  <!-- =========================================================
+       LÓGICA DA APLICAÇÃO (JavaScript Puro + localStorage)
+       ========================================================= -->
+  <script>
+    'use strict';
+
+    /* =========================================================
+       1. CONSTANTES E DADOS INICIAIS EXCLUSIVAMENTE FICTÍCIOS
+       ========================================================= */
+    const STORAGE_KEY = 'ifce_memoria_campus_mombaca_v2';
+    const CAMPUS_NAME = 'Campus Mombaça';
+    const SETORES_CAMPUS = [
+      'Coordenação de Gestão de Contratos Administrativos',
+      'Coordenação de Patrimônio e Almoxarifado',
+      'Coordenação de Ensino',
+      'Coordenação do Curso de Administração'
+    ];
+
+    /**
+     * Checklist padrão para transferências de atividades entre responsáveis.
+     * Os itens são genéricos e devem ser ajustados às rotinas reais de cada coordenação.
+     */
+    const DEFAULT_CHECKLIST_ITEMS = [
+      'Apresentação das rotinas, responsabilidades e prioridades da coordenação',
+      'Repasse dos processos em andamento, prazos e demandas pendentes',
+      'Orientação sobre os sistemas institucionais, documentos e pastas de trabalho',
+      'Apresentação dos contatos e dos fluxos de comunicação utilizados pelo setor',
+      'Conferência dos modelos, planilhas, registros e controles da coordenação',
+      'Acompanhamento inicial das atividades e esclarecimento de dúvidas'
+    ];
+
+    /**
+     * Dados demonstrativos contextualizados para o Campus Mombaça.
+     * As descrições são exemplos de referência, não uma declaração oficial das atribuições locais.
+     * Devem ser validadas com os servidores de cada coordenação antes de qualquer uso real.
+     */
+    function getInitialSeedData() {
+      return {
+        cadernos: [
+          {
+            id: 'cad-contratos-01',
+            nomeFuncao: 'Apoio à gestão e fiscalização de contratos',
+            setor: 'Coordenação de Gestão de Contratos Administrativos',
+            campus: CAMPUS_NAME,
+            responsabilidades:
+              'Apoiar a coordenação no acompanhamento dos contratos administrativos relacionados às demandas do Campus Mombaça. Manter organizadas as informações sobre vigência, responsáveis pela fiscalização, documentos, entregas, ocorrências e providências necessárias. Registrar prazos e apoiar a tramitação das demandas conforme os fluxos institucionais vigentes.',
+            atividadesRotineiras:
+              '• Acompanhar os prazos de vigência e os principais marcos dos contratos sob acompanhamento do campus.\n• Organizar documentos encaminhados pelos fiscais e responsáveis pelos contratos.\n• Apoiar a conferência de notas fiscais, medições, relatórios e documentos relacionados à execução contratual.\n• Registrar ocorrências, solicitações, providências e pendências em controle de acompanhamento.\n• Apoiar a comunicação entre fiscalização, coordenação e demais setores envolvidos.',
+            procedimentosPassoAPasso:
+              '1. Identificar o contrato e a demanda recebida, verificando o responsável pelo acompanhamento.\n2. Consultar o processo e os documentos disponíveis no sistema institucional utilizado pelo IFCE.\n3. Conferir se os documentos necessários foram encaminhados e registrar eventuais ausências.\n4. Verificar prazos, vigência e providências indicadas no instrumento contratual e nas orientações recebidas.\n5. Encaminhar a demanda ao responsável competente, respeitando o fluxo institucional.\n6. Atualizar o controle de acompanhamento e registrar o encaminhamento realizado.',
+            sistemasUtilizados:
+              'Sistema institucional de processos e documentos utilizado pelo IFCE; e-mail institucional; planilhas de acompanhamento de contratos; pastas institucionais compartilhadas. Confirmar com a coordenação os sistemas, módulos e controles efetivamente utilizados no Campus Mombaça.',
+            prazosImportantes:
+              '• Prazos de vigência, renovação e encerramento: observar cada instrumento contratual e as orientações da área responsável.\n• Notas fiscais, medições e relatórios: acompanhar os prazos definidos no contrato e no fluxo institucional.\n• Pendências e ocorrências: registrar e encaminhar assim que identificadas.\n• Relatórios de acompanhamento: observar a periodicidade definida pela coordenação.',
+            conhecimentosEssenciais:
+              'Noções de gestão e fiscalização de contratos administrativos; leitura de contratos e documentos de execução; organização de processos; controle de prazos; elaboração e atualização de planilhas; uso dos sistemas institucionais; comunicação com fiscais e setores envolvidos; cuidado com informações administrativas.',
+            atualizadoEm: '2026-11-20T12:00:00.000Z'
+          },
+          {
+            id: 'cad-patrimonio-02',
+            nomeFuncao: 'Apoio ao controle patrimonial e de almoxarifado',
+            setor: 'Coordenação de Patrimônio e Almoxarifado',
+            campus: CAMPUS_NAME,
+            responsabilidades:
+              'Apoiar o controle dos materiais de consumo e dos bens permanentes vinculados ao Campus Mombaça. Contribuir para o registro de recebimentos, armazenamento, distribuição, movimentações, conferências e inventários, mantendo informações organizadas e rastreáveis conforme os procedimentos institucionais.',
+            atividadesRotineiras:
+              '• Apoiar o recebimento e a conferência dos materiais entregues ao campus.\n• Registrar entradas, saídas e distribuição de materiais de consumo.\n• Acompanhar níveis de estoque e comunicar necessidades de reposição.\n• Organizar documentos relacionados à guarda, movimentação e responsabilidade por bens permanentes.\n• Apoiar levantamentos físicos e conferências periódicas de materiais e patrimônio.\n• Registrar divergências, avarias ou necessidades de manutenção e encaminhá-las à coordenação.',
+            procedimentosPassoAPasso:
+              '1. Receber a informação ou solicitação relacionada a material ou bem patrimonial.\n2. Conferir a documentação e, quando aplicável, a quantidade e as condições do item recebido.\n3. Registrar a entrada, saída ou movimentação no controle ou sistema institucional utilizado.\n4. Identificar o local de armazenamento ou destino do material, conforme orientação da coordenação.\n5. Atualizar os registros de estoque ou de responsabilidade patrimonial.\n6. Comunicar divergências e manter arquivados os comprovantes e documentos pertinentes.',
+            sistemasUtilizados:
+              'Sistema institucional de patrimônio e/ou almoxarifado utilizado pelo IFCE; sistema de processos e documentos; planilhas de controle; formulários e documentos de recebimento e movimentação. Confirmar os nomes dos sistemas e os procedimentos adotados no Campus Mombaça.',
+            prazosImportantes:
+              '• Recebimento de materiais: conferir e registrar conforme o fluxo definido pela coordenação.\n• Solicitações de materiais: atender conforme disponibilidade e prioridade autorizada.\n• Movimentação de bens: registrar antes ou imediatamente após a movimentação, conforme procedimento institucional.\n• Inventários e conferências: seguir o calendário e as orientações institucionais.',
+            conhecimentosEssenciais:
+              'Noções de controle de estoque e patrimônio público; conferência de materiais; organização e armazenamento; registro de entradas, saídas e movimentações; inventário; uso de planilhas e sistemas institucionais; zelo pelos bens públicos e organização documental.',
+            atualizadoEm: '2026-11-20T12:05:00.000Z'
+          },
+          {
+            id: 'cad-ensino-03',
+            nomeFuncao: 'Apoio às rotinas administrativas da Coordenação de Ensino',
+            setor: 'Coordenação de Ensino',
+            campus: CAMPUS_NAME,
+            responsabilidades:
+              'Apoiar a organização e o acompanhamento das rotinas administrativas relacionadas ao ensino no Campus Mombaça. Contribuir para a organização de informações acadêmicas, calendário, horários, demandas de docentes e estudantes e encaminhamentos internos, respeitando as atribuições da coordenação e os regulamentos institucionais.',
+            atividadesRotineiras:
+              '• Acompanhar comunicados, prazos e atividades previstos no calendário acadêmico.\n• Apoiar a organização de horários, salas e informações necessárias às atividades de ensino.\n• Receber, organizar e encaminhar demandas de docentes e estudantes aos responsáveis competentes.\n• Preparar documentos e registros de reuniões e atividades da coordenação.\n• Atualizar controles de demandas, pendências e encaminhamentos.\n• Apoiar a comunicação de orientações acadêmicas pelos canais institucionais.',
+            procedimentosPassoAPasso:
+              '1. Receber a demanda e identificar se está relacionada a calendário, horário, docente, turma ou atendimento acadêmico.\n2. Verificar as informações disponíveis e os prazos do calendário acadêmico vigente.\n3. Identificar a unidade ou o responsável competente para tratar a solicitação.\n4. Encaminhar a demanda pelo fluxo institucional adequado, sem substituir decisões da coordenação.\n5. Registrar o encaminhamento e acompanhar eventual retorno.\n6. Organizar os documentos e atualizar o controle de pendências da coordenação.',
+            sistemasUtilizados:
+              'Sistemas acadêmicos e administrativos institucionais utilizados pelo IFCE; e-mail institucional; calendário acadêmico; planilhas e documentos compartilhados. Confirmar com a Coordenação de Ensino os sistemas e canais efetivamente adotados no Campus Mombaça.',
+            prazosImportantes:
+              '• Calendário acadêmico: observar períodos de matrícula, início e encerramento de períodos letivos e demais datas oficiais.\n• Horários e organização de turmas: acompanhar os prazos definidos pela coordenação.\n• Demandas de docentes e estudantes: registrar e encaminhar conforme os prazos institucionais.\n• Reuniões e registros: organizar conforme agenda e orientações da coordenação.',
+            conhecimentosEssenciais:
+              'Conhecimento do calendário acadêmico e das normas institucionais aplicáveis; organização de documentos; atendimento e comunicação institucional; noções de rotinas acadêmicas; uso de sistemas administrativos e acadêmicos; atenção a prazos e sigilo de informações estudantis.',
+            atualizadoEm: '2026-11-20T12:10:00.000Z'
+          },
+          {
+            id: 'cad-administracao-04',
+            nomeFuncao: 'Apoio às atividades da Coordenação do Curso de Administração',
+            setor: 'Coordenação do Curso de Administração',
+            campus: CAMPUS_NAME,
+            responsabilidades:
+              'Apoiar a coordenação do Curso de Administração na organização de informações e atividades acadêmicas do curso. Contribuir para o acompanhamento de demandas de estudantes e docentes, organização de reuniões, atualização de documentos do curso e encaminhamento de assuntos relacionados à trajetória acadêmica, conforme as normas institucionais.',
+            atividadesRotineiras:
+              '• Organizar documentos, comunicados e registros relacionados ao Curso de Administração.\n• Apoiar a preparação de reuniões e a organização de pautas, atas e encaminhamentos.\n• Acompanhar demandas de estudantes e docentes e direcioná-las à coordenação ou ao setor competente.\n• Manter organizadas as informações de calendário, componentes curriculares e atividades do curso.\n• Apoiar a divulgação de orientações e prazos acadêmicos.\n• Registrar pendências e acompanhar os encaminhamentos definidos pela coordenação.',
+            procedimentosPassoAPasso:
+              '1. Receber a solicitação relacionada ao Curso de Administração e registrar seu assunto.\n2. Consultar o calendário acadêmico e os documentos vigentes do curso, quando necessário.\n3. Identificar se a demanda pode ser resolvida pela coordenação ou se deve ser encaminhada a outra unidade.\n4. Preparar as informações e os documentos necessários para análise da coordenação.\n5. Registrar a decisão ou o encaminhamento recebido, respeitando os limites de acesso e de atribuição.\n6. Atualizar o controle de demandas e comunicar o retorno pelo canal institucional adequado.',
+            sistemasUtilizados:
+              'Sistema acadêmico institucional utilizado pelo IFCE; sistema de processos e documentos; e-mail institucional; calendário acadêmico; documentos e planilhas compartilhados do curso. Confirmar os sistemas e repositórios efetivamente utilizados pela Coordenação do Curso de Administração no Campus Mombaça.',
+            prazosImportantes:
+              '• Períodos de matrícula e ajustes acadêmicos: observar o calendário acadêmico vigente.\n• Reuniões do curso: acompanhar a agenda e os prazos de envio de pautas e documentos.\n• Demandas de estudantes: encaminhar conforme os prazos e procedimentos institucionais.\n• Atividades de planejamento e avaliação do curso: seguir o cronograma definido pela coordenação.',
+            conhecimentosEssenciais:
+              'Conhecimento básico da organização acadêmica do Curso de Administração; leitura de documentos e normas do curso; organização de reuniões e registros; comunicação com estudantes e docentes; acompanhamento de prazos; uso dos sistemas institucionais; cuidado com dados acadêmicos.',
+            atualizadoEm: '2026-11-20T12:15:00.000Z'
+          }
+        ],
+        transicoes: [
+          {
+            id: 'trans-demo-mombaca-01',
+            cadernoId: 'cad-patrimonio-02',
+            responsavelAnterior: 'Responsável anterior (exemplo fictício)',
+            novoResponsavel: 'Novo responsável (exemplo fictício)',
+            status: 'em_andamento',
+            criadaEm: '2026-11-20T13:00:00.000Z',
+            finalizadaEm: null,
+            checklist: [
+              { id: 'chk-m1', texto: 'Apresentação das rotinas e responsabilidades da coordenação', concluido: true },
+              { id: 'chk-m2', texto: 'Repasse dos materiais, registros e controles em uso', concluido: true },
+              { id: 'chk-m3', texto: 'Orientação sobre os sistemas e documentos utilizados', concluido: true },
+              { id: 'chk-m4', texto: 'Conferência das pendências de estoque e patrimônio', concluido: false },
+              { id: 'chk-m5', texto: 'Acompanhamento de uma rotina de recebimento ou movimentação', concluido: false },
+              { id: 'chk-m6', texto: 'Validação dos arquivos e dos próximos prazos da coordenação', concluido: false }
+            ],
+            pendencias: [
+              {
+                id: 'pend-m1',
+                descricao: 'Exemplo demonstrativo: conferir e atualizar o registro de uma movimentação patrimonial pendente.',
+                resolvida: false,
+                criadaEm: '2026-11-20T13:10:00.000Z'
+              },
+              {
+                id: 'pend-m2',
+                descricao: 'Exemplo demonstrativo: revisar a relação de materiais com necessidade de reposição e registrar o encaminhamento.',
+                resolvida: false,
+                criadaEm: '2026-11-20T13:15:00.000Z'
+              }
+            ]
+          }
+        ]
+      };
+    }
+
+    /* =========================================================
+       2. ESTADO DA APLICAÇÃO E PERSISTÊNCIA (localStorage)
+       ========================================================= */
+    const state = {
+      currentScreen: 'painel', // 'painel' | 'cadernos' | 'transicoes'
+      cadernos: [],
+      transicoes: [],
+      searchCadernos: '',
+      selectedTransicaoId: null
+    };
+
+    /**
+     * Carrega os dados do localStorage com tratamento seguro de erros.
+     * Caso não existam dados salvos ou haja corrupção, carrega o conjunto fictício inicial.
+     */
+    function loadStateFromStorage() {
+      try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.cadernos) && Array.isArray(parsed.transicoes)) {
+            state.cadernos = parsed.cadernos;
+            state.transicoes = parsed.transicoes;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Não foi possível ler os dados salvos localmente. Usando dados fictícios iniciais.', err);
+      }
+
+      const seed = getInitialSeedData();
+      state.cadernos = seed.cadernos;
+      state.transicoes = seed.transicoes;
+      saveStateToStorage();
+    }
+
+    /**
+     * Persiste automaticamente cadernos e transições no localStorage.
+     */
+    function saveStateToStorage() {
+      try {
+        const payload = {
+          cadernos: state.cadernos,
+          transicoes: state.transicoes
+        };
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (err) {
+        console.warn('Não foi possível salvar no localStorage:', err);
+      }
+    }
+
+    /* =========================================================
+       3. FUNÇÕES UTILITÁRIAS
+       ========================================================= */
+
+    /**
+     * Escapa caracteres especiais HTML para evitar injeção de código ao exibir textos do usuário.
+     */
+    function escapeHtml(text) {
+      if (text === null || text === undefined) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * Gera identificador único simples para novos cadernos, transições e itens.
+     */
+    function generateId(prefix) {
+      return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    /**
+     * Formata uma data ISO para o padrão brasileiro (DD/MM/AAAA).
+     */
+    function formatDateBR(isoString) {
+      if (!isoString) return '—';
+      try {
+        const d = new Date(isoString);
+        if (Number.isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      } catch {
+        return '—';
+      }
+    }
+
+    /**
+     * Busca um caderno pelo seu ID.
+     */
+    function getCadernoById(id) {
+      return state.cadernos.find((c) => c.id === id) || null;
+    }
+
+    /**
+     * Calcula o percentual de conclusão (0 a 100) de uma transição com base no seu checklist.
+     */
+    function getTransicaoProgress(transicao) {
+      const items = Array.isArray(transicao.checklist) ? transicao.checklist : [];
+      if (items.length === 0) {
+        return transicao.status === 'finalizada' ? 100 : 0;
+      }
+      const done = items.filter((item) => item.concluido).length;
+      return Math.round((done / items.length) * 100);
+    }
+
+    /**
+     * Calcula os indicadores consolidados (KPIs) exibidos na tela Painel.
+     */
+    function computeDashboardMetrics() {
+      const totalCadernos = state.cadernos.length;
+      const transicoesEmAndamento = state.transicoes.filter((t) => t.status === 'em_andamento');
+      const transicoesFinalizadas = state.transicoes.filter((t) => t.status === 'finalizada');
+
+      // Coleta todas as pendências em aberto (com referência à transição e ao caderno)
+      const pendenciasAbertas = [];
+      state.transicoes.forEach((transicao) => {
+        const caderno = getCadernoById(transicao.cadernoId);
+        const nomeFuncao = caderno ? caderno.nomeFuncao : 'Função não encontrada';
+        (transicao.pendencias || []).forEach((p) => {
+          if (!p.resolvida) {
+            pendenciasAbertas.push({
+              ...p,
+              transicaoId: transicao.id,
+              transicaoStatus: transicao.status,
+              nomeFuncao
+            });
+          }
+        });
+      });
+
+      // Média percentual de conclusão considerando todas as transições registradas
+      let mediaConclusao = 0;
+      if (state.transicoes.length > 0) {
+        const somaPercentuais = state.transicoes.reduce((acc, t) => acc + getTransicaoProgress(t), 0);
+        mediaConclusao = Math.round(somaPercentuais / state.transicoes.length);
+      }
+
+      return {
+        totalCadernos,
+        emAndamentoCount: transicoesEmAndamento.length,
+        finalizadasCount: transicoesFinalizadas.length,
+        totalTransicoes: state.transicoes.length,
+        pendenciasAbertas,
+        mediaConclusao,
+        transicoesEmAndamento
+      };
+    }
+
+    /**
+     * Exibe notificação toast discreta e acessível (substituindo qualquer uso de alert).
+     */
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const styles =
+        type === 'error'
+          ? 'bg-red-50 text-red-800 border-red-200'
+          : type === 'info'
+          ? 'bg-slate-800 text-white border-slate-700'
+          : 'bg-ifce-dark text-white border-ifce';
+
+      const icon =
+        type === 'error'
+          ? '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+          : '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-lg text-sm font-medium transition-all duration-300 opacity-0 translate-y-2 ${styles}`;
+      toast.innerHTML = `${icon}<span class="leading-snug">${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3200);
+    }
+
+    /* =========================================================
+       4. NAVEGAÇÃO ENTRE AS 3 TELAS
+       ========================================================= */
+
+    /**
+     * Alterna entre 'painel', 'cadernos' e 'transicoes'.
+     */
+    function navigateTo(screen, options = {}) {
+      if (!['painel', 'cadernos', 'transicoes'].includes(screen)) return;
+      state.currentScreen = screen;
+
+      if (screen === 'transicoes') {
+        if (options.transicaoId) {
+          state.selectedTransicaoId = options.transicaoId;
+        } else if (!state.selectedTransicaoId && state.transicoes.length > 0) {
+          // Prioriza selecionar uma transição em andamento
+          const firstActive = state.transicoes.find((t) => t.status === 'em_andamento');
+          state.selectedTransicaoId = firstActive ? firstActive.id : state.transicoes[0].id;
+        }
+      }
+
+      updateNavigationHighlight();
+      renderCurrentScreen();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Ações diretas opcionais a partir do Painel (ex: consultar ou editar caderno)
+      if (screen === 'cadernos' && options.viewCadernoId) {
+        openCadernoViewModal(options.viewCadernoId);
+      } else if (screen === 'cadernos' && options.editCadernoId) {
+        openCadernoFormModal(options.editCadernoId);
+      }
+    }
+
+    /**
+     * Atualiza visualmente o estado ativo nos menus desktop e mobile.
+     */
+    function updateNavigationHighlight() {
+      document.querySelectorAll('.nav-item').forEach((btn) => {
+        const isActive = btn.dataset.nav === state.currentScreen;
+        if (isActive) {
+          btn.className =
+            'nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-left bg-ifce-soft text-ifce-dark border border-ifce-border';
+        } else {
+          btn.className =
+            'nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent';
+        }
+      });
+
+      document.querySelectorAll('.nav-mobile-item').forEach((btn) => {
+        const isActive = btn.dataset.navMobile === state.currentScreen;
+        if (isActive) {
+          btn.className =
+            'nav-mobile-item flex flex-col items-center justify-center gap-1 px-1 text-xs font-semibold transition-colors text-ifce bg-ifce-soft/60 border-t-2 border-ifce';
+        } else {
+          btn.className =
+            'nav-mobile-item flex flex-col items-center justify-center gap-1 px-1 text-xs font-medium transition-colors text-slate-500 hover:text-slate-800 border-t-2 border-transparent';
+        }
+      });
+    }
+
+    /**
+     * Renderiza a tela atualmente selecionada.
+     */
+    function renderCurrentScreen() {
+      const container = document.getElementById('app-content');
+      if (!container) return;
+
+      if (state.currentScreen === 'painel') {
+        container.innerHTML = renderPainelHTML();
+      } else if (state.currentScreen === 'cadernos') {
+        container.innerHTML = renderCadernosHTML();
+      } else if (state.currentScreen === 'transicoes') {
+        container.innerHTML = renderTransicoesHTML();
+      }
+    }
+
+    /* =========================================================
+       5. TELA 1 — PAINEL GERAL
+       ========================================================= */
+    function renderPainelHTML() {
+      const m = computeDashboardMetrics();
+
+      const transicoesAtivasHTML =
+        m.transicoesEmAndamento.length === 0
+          ? `
+            <div class="rounded-xl border border-dashed border-surface-line bg-slate-50/70 p-6 text-center">
+              <p class="text-sm font-medium text-slate-700">Nenhuma transição em andamento no momento.</p>
+              <p class="text-xs text-slate-500 mt-1">Inicie uma nova transferência de função para acompanhar checklists e pendências.</p>
+              <button
+                type="button"
+                onclick="navigateTo('transicoes'); openNewTransicaoModal();"
+                class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-xs font-semibold transition-colors"
+              >
+                + Iniciar Nova Transição
+              </button>
+            </div>
+          `
+          : m.transicoesEmAndamento
+              .map((t) => {
+                const caderno = getCadernoById(t.cadernoId);
+                const progress = getTransicaoProgress(t);
+                const openPendencias = (t.pendencias || []).filter((p) => !p.resolvida).length;
+                return `
+                  <div class="rounded-xl border border-surface-line bg-white p-4 hover:border-ifce-border transition-colors">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <h4 class="text-sm font-semibold text-slate-900 break-words">
+                            ${escapeHtml(caderno ? caderno.nomeFuncao : 'Função sem vínculo')}
+                          </h4>
+                          ${
+                            openPendencias > 0
+                              ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">${openPendencias} ${openPendencias === 1 ? 'pendência' : 'pendências'}</span>`
+                              : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-ifce-soft text-ifce-dark">Sem pendências</span>`
+                          }
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1.5 flex flex-wrap items-center gap-1.5">
+                          <span class="font-medium text-slate-700">${escapeHtml(t.responsavelAnterior)}</span>
+                          <span class="text-slate-400" aria-hidden="true">→</span>
+                          <span class="font-medium text-ifce-dark">${escapeHtml(t.novoResponsavel)}</span>
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onclick="navigateTo('transicoes', { transicaoId: '${escapeHtml(t.id)}' })"
+                        class="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-ifce-soft hover:bg-ifce text-ifce-dark hover:text-white text-xs font-semibold transition-colors"
+                      >
+                        Abrir transição
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                      </button>
+                    </div>
+                    <div class="mt-3.5">
+                      <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-slate-500">Progresso do checklist</span>
+                        <span class="font-semibold text-ifce-dark">${progress}%</span>
+                      </div>
+                      <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-ifce rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              })
+              .join('');
+
+      const pendenciasAbertasHTML =
+        m.pendenciasAbertas.length === 0
+          ? `
+            <div class="rounded-xl border border-dashed border-surface-line bg-slate-50/70 p-6 text-center">
+              <p class="text-sm font-medium text-slate-700">Nenhuma pendência em aberto.</p>
+              <p class="text-xs text-slate-500 mt-1">Todas as pendências registradas nas transições foram resolvidas.</p>
+            </div>
+          `
+          : m.pendenciasAbertas
+              .map(
+                (p) => `
+                  <div class="rounded-xl border border-surface-line bg-white p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="min-w-0">
+                      <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md mb-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        ${escapeHtml(p.nomeFuncao)}
+                      </span>
+                      <p class="text-sm text-slate-700 leading-snug break-words">${escapeHtml(p.descricao)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onclick="navigateTo('transicoes', { transicaoId: '${escapeHtml(p.transicaoId)}' })"
+                      class="shrink-0 px-3 py-2 rounded-xl border border-surface-line hover:border-ifce hover:text-ifce-dark text-xs font-medium text-slate-700 transition-colors"
+                    >
+                      Ver transição
+                    </button>
+                  </div>
+                `
+              )
+              .join('');
+
+      const cadernosRapidosHTML =
+        state.cadernos.length === 0
+          ? `
+            <div class="rounded-xl border border-dashed border-surface-line bg-slate-50/70 p-6 text-center">
+              <p class="text-sm font-medium text-slate-700">Nenhum caderno cadastrado.</p>
+            </div>
+          `
+          : state.cadernos
+              .map(
+                (c) => `
+                  <div class="rounded-xl border border-surface-line bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="min-w-0">
+                      <h4 class="text-sm font-semibold text-slate-900 break-words">${escapeHtml(c.nomeFuncao)}</h4>
+                      <p class="text-xs text-slate-500 mt-1">${escapeHtml(c.setor)} • ${escapeHtml(c.campus)}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onclick="navigateTo('cadernos', { viewCadernoId: '${escapeHtml(c.id)}' })"
+                        class="px-3 py-2 rounded-xl bg-ifce-soft hover:bg-ifce text-ifce-dark hover:text-white text-xs font-semibold transition-colors"
+                      >
+                        Consultar
+                      </button>
+                      <button
+                        type="button"
+                        onclick="navigateTo('cadernos', { editCadernoId: '${escapeHtml(c.id)}' })"
+                        class="px-3 py-2 rounded-xl border border-surface-line hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors"
+                      >
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                `
+              )
+              .join('');
+
+      return `
+        <section class="space-y-6">
+          <!-- Cabeçalho da Tela -->
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Painel Geral — Campus Mombaça</h2>
+              <p class="text-sm text-slate-600 mt-1 max-w-2xl">
+                Acompanhe os registros das quatro coordenações selecionadas, as transições de responsáveis e as pendências administrativas do Campus Mombaça.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4 Cartões de Indicadores (KPIs) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <!-- KPI 1: Cadernos de funções cadastrados -->
+            <div class="bg-surface-card rounded-2xl border border-surface-line p-5 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cadernos de Funções</span>
+                <span class="w-9 h-9 rounded-xl bg-ifce-soft text-ifce flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </span>
+              </div>
+              <div class="mt-4">
+                <p class="text-3xl font-bold text-slate-900">${m.totalCadernos}</p>
+                <p class="text-xs text-slate-500 mt-1">Cadernos cadastrados e documentados</p>
+              </div>
+            </div>
+
+            <!-- KPI 2: Transições em andamento -->
+            <div class="bg-surface-card rounded-2xl border border-surface-line p-5 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Transições em Andamento</span>
+                <span class="w-9 h-9 rounded-xl bg-ifce-soft text-ifce flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                </span>
+              </div>
+              <div class="mt-4">
+                <p class="text-3xl font-bold text-slate-900">${m.emAndamentoCount}</p>
+                <p class="text-xs text-slate-500 mt-1">
+                  ${m.finalizadasCount} ${m.finalizadasCount === 1 ? 'transição finalizada' : 'transições finalizadas'}
+                </p>
+              </div>
+            </div>
+
+            <!-- KPI 3: Pendências de transferência -->
+            <div class="bg-surface-card rounded-2xl border border-surface-line p-5 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pendências de Transferência</span>
+                <span class="w-9 h-9 rounded-xl ${m.pendenciasAbertas.length > 0 ? 'bg-amber-50 text-amber-700' : 'bg-ifce-soft text-ifce'} flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </span>
+              </div>
+              <div class="mt-4">
+                <p class="text-3xl font-bold text-slate-900">${m.pendenciasAbertas.length}</p>
+                <p class="text-xs text-slate-500 mt-1">
+                  ${m.pendenciasAbertas.length === 1 ? 'Pendência em aberto nas transições' : 'Pendências em aberto nas transições'}
+                </p>
+              </div>
+            </div>
+
+            <!-- KPI 4: Percentual de conclusão das transições -->
+            <div class="bg-surface-card rounded-2xl border border-surface-line p-5 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Conclusão das Transições</span>
+                <span class="w-9 h-9 rounded-xl bg-ifce-soft text-ifce flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+              </div>
+              <div class="mt-4">
+                <div class="flex items-baseline justify-between">
+                  <p class="text-3xl font-bold text-ifce-dark">${m.mediaConclusao}%</p>
+                  <span class="text-xs text-slate-500">Média geral</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mt-2.5">
+                  <div class="h-full bg-ifce rounded-full transition-all duration-300" style="width: ${m.mediaConclusao}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid de Seções Resumidas -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Transições em Andamento -->
+            <div class="bg-surface-card rounded-2xl border border-surface-line p-5 sm:p-6 shadow-sm">
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div>
+                  <h3 class="text-base font-bold text-slate-900">Transições em Andamento</h3>
+                  <p class="text-xs text-slate-500">Passagens de função atualmente ativas</p>
+                </div>
+                <button
+                  type="button"
+                  onclick="navigateTo('transicoes')"
+                  class="text-xs font-semibold text-ifce hover:text-ifce-dark transition-colors"
+                >
+                  Ver todas
+                </button>
+              </div>
+              <div class="space-y-3">
+                ${transicoesAtivasHTML}
+              </div>
+            </div>
+
+            <!-- Pendências de Transferência em Aberto -->
+            <div class="bg-surface-card rounded-2xl border border-surface-line p-5 sm:p-6 shadow-sm">
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div>
+                  <h3 class="text-base font-bold text-slate-900">Pendências de Transferência em Aberto</h3>
+                  <p class="text-xs text-slate-500">Itens aguardando resolução durante a transição</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${m.pendenciasAbertas.length > 0 ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-ifce-soft text-ifce-dark'}">
+                  ${m.pendenciasAbertas.length}
+                </span>
+              </div>
+              <div class="space-y-3">
+                ${pendenciasAbertasHTML}
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista Rápida de Cadernos Cadastrados -->
+          <div class="bg-surface-card rounded-2xl border border-surface-line p-5 sm:p-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Cadernos de Funções Cadastrados</h3>
+                <p class="text-xs text-slate-500">Acesso rápido aos registros de conhecimento administrativo</p>
+              </div>
+              <button
+                type="button"
+                onclick="navigateTo('cadernos')"
+                class="self-start sm:self-auto text-xs font-semibold text-ifce hover:text-ifce-dark transition-colors"
+              >
+                Gerenciar cadernos →
+              </button>
+            </div>
+            <div class="space-y-3">
+              ${cadernosRapidosHTML}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    /* =========================================================
+       6. TELA 2 — CADERNOS DE FUNÇÕES
+       ========================================================= */
+    function renderCadernosHTML() {
+      const termo = state.searchCadernos.trim().toLowerCase();
+      const filtrados = state.cadernos.filter((c) => {
+        if (!termo) return true;
+        return (
+          c.nomeFuncao.toLowerCase().includes(termo) ||
+          c.setor.toLowerCase().includes(termo) ||
+          c.campus.toLowerCase().includes(termo)
+        );
+      });
+
+      const cardsHTML =
+        filtrados.length === 0
+          ? `
+            <div class="col-span-full bg-surface-card rounded-2xl border border-dashed border-surface-line p-10 text-center">
+              <p class="text-sm font-semibold text-slate-700">Nenhum caderno encontrado.</p>
+              <p class="text-xs text-slate-500 mt-1">
+                ${termo ? 'Tente ajustar a busca por função ou coordenação.' : 'Clique em "+ Novo Caderno" para documentar uma função administrativa.'}
+              </p>
+            </div>
+          `
+          : filtrados
+              .map((c) => {
+                const transicoesVinculadas = state.transicoes.filter((t) => t.cadernoId === c.id).length;
+                return `
+                  <article class="bg-surface-card rounded-2xl border border-surface-line p-5 shadow-sm hover:border-ifce-border transition-all flex flex-col justify-between gap-4">
+                    <div>
+                      <div class="flex items-start justify-between gap-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-ifce-soft text-ifce-dark text-[11px] font-semibold">
+                          ${escapeHtml(c.campus)}
+                        </span>
+                        <span class="text-[11px] text-slate-400 shrink-0">
+                          Atualizado em ${formatDateBR(c.atualizadoEm)}
+                        </span>
+                      </div>
+                      <h3 class="text-base font-bold text-slate-900 mt-3 leading-snug break-words">
+                        ${escapeHtml(c.nomeFuncao)}
+                      </h3>
+                      <p class="text-xs font-medium text-slate-600 mt-1">
+                        Coordenação: <span class="text-slate-800">${escapeHtml(c.setor)}</span>
+                      </p>
+                      <p class="text-xs text-slate-500 mt-3 line-clamp-3 leading-relaxed">
+                        ${escapeHtml(c.responsabilidades)}
+                      </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-surface-line flex flex-wrap items-center justify-between gap-2">
+                      <span class="text-[11px] text-slate-500">
+                        ${transicoesVinculadas} ${transicoesVinculadas === 1 ? 'transição vinculada' : 'transições vinculadas'}
+                      </span>
+                      <div class="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onclick="openCadernoViewModal('${escapeHtml(c.id)}')"
+                          class="px-3.5 py-2 rounded-xl bg-ifce-soft hover:bg-ifce text-ifce-dark hover:text-white text-xs font-semibold transition-colors"
+                        >
+                          Visualizar
+                        </button>
+                        <button
+                          type="button"
+                          onclick="openCadernoFormModal('${escapeHtml(c.id)}')"
+                          class="px-3.5 py-2 rounded-xl border border-surface-line hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors"
+                        >
+                          Editar
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                `;
+              })
+              .join('');
+
+      return `
+        <section class="space-y-6">
+          <!-- Cabeçalho -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Cadernos de Funções — Campus Mombaça</h2>
+              <p class="text-sm text-slate-600 mt-1">
+                Registre e consulte as rotinas de trabalho das coordenações de Contratos, Patrimônio e Almoxarifado, Ensino e Curso de Administração.
+              </p>
+            </div>
+            <button
+              type="button"
+              onclick="openCadernoFormModal(null)"
+              class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-sm font-semibold shadow-sm transition-colors shrink-0"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              + Novo Caderno
+            </button>
+          </div>
+
+          <!-- Busca simples por função, setor ou campus -->
+          <div class="bg-surface-card rounded-2xl border border-surface-line p-3.5 shadow-sm">
+            <label for="search-cadernos" class="sr-only">Buscar caderno por função ou coordenação</label>
+            <div class="relative">
+              <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <input
+                id="search-cadernos"
+                type="text"
+                value="${escapeHtml(state.searchCadernos)}"
+                oninput="handleSearchCadernos(this.value)"
+                placeholder="Buscar por função ou coordenação..."
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-surface-line bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm text-slate-800 placeholder-slate-400"
+              />
+            </div>
+          </div>
+
+          <!-- Grade de Cadernos -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${cardsHTML}
+          </div>
+        </section>
+      `;
+    }
+
+    /**
+     * Atualiza o filtro de busca na tela Cadernos preservando foco e posição do cursor.
+     */
+    function handleSearchCadernos(value) {
+      state.searchCadernos = value;
+      renderCurrentScreen();
+      const input = document.getElementById('search-cadernos');
+      if (input) {
+        input.focus();
+        input.setSelectionRange(value.length, value.length);
+      }
+    }
+
+    /* =========================================================
+       7. TELA 3 — TRANSIÇÃO DE FUNÇÕES
+       ========================================================= */
+    function renderTransicoesHTML() {
+      const emAndamento = state.transicoes.filter((t) => t.status === 'em_andamento');
+      const finalizadas = state.transicoes.filter((t) => t.status === 'finalizada');
+
+      // Garante seleção válida caso existam transições
+      let selected = state.transicoes.find((t) => t.id === state.selectedTransicaoId) || null;
+      if (!selected && state.transicoes.length > 0) {
+        selected = emAndamento[0] || finalizadas[0];
+        state.selectedTransicaoId = selected.id;
+      }
+
+      const renderListItem = (t) => {
+        const caderno = getCadernoById(t.cadernoId);
+        const progress = getTransicaoProgress(t);
+        const isSelected = selected && selected.id === t.id;
+        const openPend = (t.pendencias || []).filter((p) => !p.resolvida).length;
+
+        return `
+          <button
+            type="button"
+            onclick="selectTransicao('${escapeHtml(t.id)}')"
+            class="w-full text-left rounded-xl border p-3.5 transition-all ${
+              isSelected
+                ? 'bg-ifce-soft/70 border-ifce shadow-sm'
+                : 'bg-white border-surface-line hover:border-ifce-border hover:bg-slate-50/60'
+            }"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-semibold text-slate-900 leading-snug break-words">
+                ${escapeHtml(caderno ? caderno.nomeFuncao : 'Função não encontrada')}
+              </p>
+              <span class="shrink-0 text-xs font-bold ${t.status === 'finalizada' ? 'text-slate-600' : 'text-ifce-dark'}">
+                ${progress}%
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 mt-1 truncate">
+              ${escapeHtml(t.responsavelAnterior)} → ${escapeHtml(t.novoResponsavel)}
+            </p>
+            <div class="mt-2.5 flex items-center gap-2">
+              <div class="flex-1 h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
+                <div class="h-full ${t.status === 'finalizada' ? 'bg-slate-500' : 'bg-ifce'} rounded-full" style="width: ${progress}%"></div>
+              </div>
+              ${
+                openPend > 0
+                  ? `<span class="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">${openPend} pend.</span>`
+                  : ''
+              }
+            </div>
+          </button>
+        `;
+      };
+
+      const sidebarListHTML = `
+        <div class="space-y-5">
+          <!-- Grupo Em Andamento -->
+          <div>
+            <div class="flex items-center justify-between mb-2.5 px-1">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-ifce-dark">Em andamento</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-ifce-soft text-ifce-dark">${emAndamento.length}</span>
+            </div>
+            <div class="space-y-2.5">
+              ${
+                emAndamento.length > 0
+                  ? emAndamento.map(renderListItem).join('')
+                  : '<p class="text-xs text-slate-500 bg-white rounded-xl border border-dashed border-surface-line p-4 text-center">Nenhuma transição em andamento.</p>'
+              }
+            </div>
+          </div>
+
+          <!-- Grupo Finalizadas -->
+          <div>
+            <div class="flex items-center justify-between mb-2.5 px-1">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Finalizadas</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">${finalizadas.length}</span>
+            </div>
+            <div class="space-y-2.5">
+              ${
+                finalizadas.length > 0
+                  ? finalizadas.map(renderListItem).join('')
+                  : '<p class="text-xs text-slate-500 bg-white rounded-xl border border-dashed border-surface-line p-4 text-center">Nenhuma transição finalizada ainda.</p>'
+              }
+            </div>
+          </div>
         </div>
-        <h4 class="preview-document-title">${h(previewTitle)}</h4>
-        <p class="preview-document-subtitle">${h(previewSubtitle)}</p>
-        <div class="preview-meta">
-         <div><b>Unidade:</b><br>${h(unidade(notebook(p.notebook_id)))}</div>
-         <div><b>Função:</b><br>${h(notebook(p.notebook_id)?.function_name||'—')}</div>
+      `;
+
+      let detailHTML = `
+        <div class="bg-surface-card rounded-2xl border border-dashed border-surface-line p-10 text-center">
+          <p class="text-base font-semibold text-slate-800">Nenhuma transição selecionada</p>
+          <p class="text-sm text-slate-500 mt-1">Inicie uma nova transferência de função para acompanhar checklist, caderno e pendências.</p>
+          <button
+            type="button"
+            onclick="openNewTransicaoModal()"
+            class="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-sm font-semibold transition-colors"
+          >
+            + Iniciar Nova Transição
+          </button>
         </div>
-        ${previewBody}
-        <div class="preview-footer"><span>IFCE Memória · Protótipo acadêmico</span><span>Prévia ${index+1}</span></div>
-       </div>`;
-   return `<article class="document-entry">
-    <div class="document-row">
-     <div class="document-info"><strong>${h(nomeExibido)}</strong><div class="muted">${h(meta?`PDF local · ${(meta.size/1024/1024).toFixed(2)} MB · atualizado ${dateBR(meta.updatedAt)}`:(d.description||'Documento demonstrativo associado ao procedimento.'))}</div></div>
-     <div class="document-local-actions">
-      <label class="btn light file-picker">＋ ${meta?'Substituir PDF':'Anexar PDF'}<input type="file" accept="application/pdf,.pdf" data-document-upload="${h(d.id)}" aria-label="Anexar PDF para ${h(titulo)}"></label>
-      ${meta?`<button type="button" class="btn light" data-document-download="${h(d.id)}">↓ Baixar PDF</button><button type="button" class="text-link" data-document-remove="${h(d.id)}">Remover</button>`:''}
-     </div>
-    </div>
-    <div class="document-preview-wrap">${localPreview}</div>
-   </article>`;
-  }).join('');
-  return back+pageTitle('PROCEDIMENTO',p.title,cadernoNome(p.notebook_id))+
-  `<div class="detail-grid">
-   <section class="detail-panel"><h3>Resumo</h3><p><b>Frequência:</b> ${h(p.frequency||'—')}</p><p><b>Objetivo:</b> ${h(p.objective||'—')}</p></section>
-   <section class="detail-panel"><h3>Etapas principais ${helpTip('Clique em cada etapa para ver uma explicação curta do que deve ser feito.')}</h3><div class="step-list">${etapasHTML||'<p>Etapas não cadastradas.</p>'}</div></section>
-  </div>
-  <section class="detail-panel"><h3>Documentos associados (${docs.length}) ${helpTip('Anexe um PDF pelo botão. Ele ficará salvo somente neste navegador; depois você poderá visualizar ou baixar o arquivo.')}</h3>${documentosHTML||'<p>Nenhum documento associado.</p>'}
-   <div class="document-note">Os PDFs anexados ficam salvos somente no armazenamento local deste navegador (IndexedDB). Não são enviados ao Supabase nem ficam disponíveis em outros computadores. Os modelos sem arquivo anexado são apenas ilustrativos.</div>
-  </section>`;
- }
- if(tipo==='transicao'){
-  const t=banco.transitions.find(x=>x.id===id);if(!t)return back+'Transição não encontrada.';if(!notebookVisivel(t.notebook_id))return back+'Esta transição não pertence à área selecionada neste acesso demonstrativo.';
-  const items=checklistOf(id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
-  return back+pageTitle('TRANSFERÊNCIA DE CONHECIMENTO','Transição de responsabilidade',cadernoNome(t.notebook_id))+
-  `<section class="detail-panel">
-   <div class="item-title"><h3 style="margin:0">${h(t.outgoing_responsible)} → ${h(t.incoming_responsible)}</h3>${badge(transitionStatus(t))}</div>
-   <p class="muted">Início: ${dateBR(t.started_at)} · Progresso: ${progressOf(t)}%</p>
-   <div class="progress"><span style="width:${progressOf(t)}%"></span></div>
-   <h3 style="margin-top:23px">Etapas da transferência ${helpTip('Lista de tarefas que ajudam a organizar a passagem do conhecimento para o novo responsável.')}</h3>
-   ${items.map(c=>`<div class="check-row"><span class="check-symbol ${c.is_completed?'':'pending'}">${c.is_completed?'✓':'○'}</span><div><b>${h(c.title)}</b><div class="muted">${c.is_completed?'Concluída':'Pendente'}</div></div></div>`).join('')||'<p>Checklist não cadastrado.</p>'}
-   <p class="muted" style="margin-top:15px">${h(t.notes||'Acompanhe as etapas da transferência.')}</p>
-  </section>
-  ${renderSignatures(t)}
-  `;
- }
- return back+'Conteúdo não encontrado.';
-}
+      `;
 
+      if (selected) {
+        const caderno = getCadernoById(selected.cadernoId);
+        const progress = getTransicaoProgress(selected);
+        const isFinalizada = selected.status === 'finalizada';
+        const totalChecklist = selected.checklist.length;
+        const doneChecklist = selected.checklist.filter((i) => i.concluido).length;
+        const openPendenciasCount = selected.pendencias.filter((p) => !p.resolvida).length;
 
-function abrirFormularioCaderno(id=null){
- const existente=id?notebook(id):null;
- const novo=!existente;
- if(novo&&!usuarioDemo?.admin){erro='Somente o administrador demonstrativo pode criar novos cadernos.';render();return;}
- if(existente&&!notebookVisivel(id)){erro='Você só pode editar o caderno da sua área.';render();return;}
- const campusOptions=banco.campuses.map(c=>`<option value="${h(c.id)}" ${existente?.campus_id===c.id?'selected':''}>${h(c.name)}</option>`).join('');
- const responsabilidades=(existente?.responsibilities||[]).join('\n');
- $('caderno-dialog-content').innerHTML=`
-  <div class="eyebrow">GESTÃO DOS CADERNOS</div>
-  <h2>${novo?'Criar novo caderno':'Editar caderno da função'}</h2>
-  <p>${novo?'Cadastre uma função e identifique sua unidade e responsável.':'Atualize as informações principais desta função.'}</p>
-  <form id="caderno-form" data-mode="${novo?'new':'edit'}" data-id="${h(existente?.id||'')}">
-   <div class="caderno-form-grid">
-    <label class="full">Nome da função<input name="function_name" maxlength="120" value="${h(existente?.function_name||'')}" placeholder="Ex.: Coordenação Administrativa" required></label>
-    <label>Campus / unidade<select name="campus_id" required><option value="" disabled ${!existente?'selected':''}>Selecione a unidade</option>${campusOptions}</select></label>
-    <label>Setor<input name="sector" maxlength="100" value="${h(existente?.sector||'')}" placeholder="Ex.: Administração" required></label>
-    <label class="full">Servidor responsável<input name="responsible_name" maxlength="120" value="${h(existente?.responsible_name||usuarioDemo?.name||'')}" placeholder="Nome do responsável"></label>
-    <label class="full">Descrição da função<textarea name="description" maxlength="700" placeholder="Explique resumidamente para que serve esta função.">${h(existente?.description||'')}</textarea></label>
-    <label class="full">Principais responsabilidades<textarea name="responsibilities" maxlength="1200" placeholder="Digite uma responsabilidade por linha.">${h(responsabilidades)}</textarea><div class="form-hint">Escreva uma responsabilidade por linha. Exemplo: Organizar processos / Acompanhar atividades / Compartilhar informações.</div></label>
-   </div>
-   <div class="dialog-actions">
-    <button type="button" class="btn light" data-caderno-cancel>Cancelar</button>
-    <button type="submit" class="btn">${novo?'Criar caderno':'Salvar alterações'}</button>
-   </div>
-  </form>
-  <div class="form-hint">Demonstração: os dados serão salvos no armazenamento local deste navegador, não no Supabase.</div>`;
- $('caderno-dialog').showModal();
-}
+        const checklistHTML =
+          selected.checklist.length === 0
+            ? `<p class="text-xs text-slate-500 py-3">Nenhum item cadastrado neste checklist.</p>`
+            : selected.checklist
+                .map(
+                  (item) => `
+                    <label class="flex items-start gap-3 p-3 rounded-xl border ${
+                      item.concluido ? 'bg-ifce-soft/40 border-ifce-border' : 'bg-white border-surface-line'
+                    } ${isFinalizada ? 'opacity-80 cursor-default' : 'cursor-pointer hover:border-ifce'} transition-colors">
+                      <input
+                        type="checkbox"
+                        ${item.concluido ? 'checked' : ''}
+                        ${isFinalizada ? 'disabled' : ''}
+                        onchange="toggleChecklistItem('${escapeHtml(selected.id)}', '${escapeHtml(item.id)}')"
+                        class="mt-0.5 w-5 h-5 rounded accent-[#1E7E34] shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                      />
+                      <span class="text-sm leading-snug break-words ${
+                        item.concluido ? 'line-through text-slate-500' : 'text-slate-800 font-medium'
+                      }">
+                        ${escapeHtml(item.texto)}
+                      </span>
+                    </label>
+                  `
+                )
+                .join('');
 
-function salvarFormularioCaderno(form){
- const data=new FormData(form);
- const mode=form.dataset.mode;
- const existingId=form.dataset.id;
- const existing=existingId?notebook(existingId):null;
- const functionName=String(data.get('function_name')||'').trim();
- const campusId=String(data.get('campus_id')||'');
- const sector=String(data.get('sector')||'').trim();
- if(!functionName||!campusId||!sector)throw new Error('Preencha o nome da função, a unidade e o setor.');
- if(!banco.campuses.some(c=>String(c.id)===campusId))throw new Error('Selecione uma unidade válida.');
- const responsibilities=String(data.get('responsibilities')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
- const id=mode==='new'?'local_'+Date.now()+'_'+Math.random().toString(36).slice(2,7):existingId;
- const updated={
-  ...(existing||{}),
-  id,
-  campus_id:campusId,
-  function_name:functionName,
-  sector,
-  responsible_name:String(data.get('responsible_name')||'').trim(),
-  description:String(data.get('description')||'').trim()||`Caderno de informações da função ${functionName}.`,
-  responsibilities,
-  status:existing?.status||'active',
-  local_demo:true
- };
- salvarCadernoLocal(updated);
- if(mode==='new')banco.notebooks.push(updated);
- else banco.notebooks=banco.notebooks.map(n=>String(n.id)===String(id)?updated:n);
- if(usuarioDemo&&!usuarioDemo.admin&&String(usuarioDemo.notebookId)===String(id)){
-  usuarioDemo.functionName=updated.function_name;
-  usuarioDemo.campusName=unidade(updated);
- }
- $('caderno-dialog').close();
- feedback=mode==='new'?'Novo caderno criado e salvo neste navegador.':'Informações do caderno atualizadas neste navegador.';
- erro='';
- detalhe={tipo:'caderno',id};
- pagina='cadernos';
- render();
- window.scrollTo(0,0);
-}
+        const pendenciasHTML =
+          selected.pendencias.length === 0
+            ? `
+              <div class="rounded-xl border border-dashed border-surface-line bg-slate-50/70 p-4 text-center text-xs text-slate-500">
+                Nenhuma pendência registrada nesta transição.
+              </div>
+            `
+            : selected.pendencias
+                .map(
+                  (p) => `
+                    <div class="rounded-xl border ${
+                      p.resolvida ? 'bg-slate-50 border-surface-line' : 'bg-white border-amber-200'
+                    } p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold ${
+                            p.resolvida
+                              ? 'bg-ifce-soft text-ifce-dark'
+                              : 'bg-amber-50 text-amber-800 border border-amber-200'
+                          }">
+                            ${p.resolvida ? 'Resolvida' : 'Aberta'}
+                          </span>
+                          <span class="text-[11px] text-slate-400">Registrada em ${formatDateBR(p.criadaEm)}</span>
+                        </div>
+                        <p class="text-sm leading-snug break-words ${
+                          p.resolvida ? 'line-through text-slate-500' : 'text-slate-800'
+                        }">
+                          ${escapeHtml(p.descricao)}
+                        </p>
+                      </div>
+                      ${
+                        !isFinalizada
+                          ? `
+                            <button
+                              type="button"
+                              onclick="togglePendenciaStatus('${escapeHtml(selected.id)}', '${escapeHtml(p.id)}')"
+                              class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                                p.resolvida
+                                  ? 'border border-surface-line bg-white hover:bg-slate-100 text-slate-700'
+                                  : 'bg-ifce-soft hover:bg-ifce text-ifce-dark hover:text-white'
+                              }"
+                            >
+                              ${p.resolvida ? 'Reabrir' : 'Marcar como resolvida'}
+                            </button>
+                          `
+                          : ''
+                      }
+                    </div>
+                  `
+                )
+                .join('');
 
-function render(){
- revogarPreviewsDocumentos();
- const layout=document.querySelector('.layout');
- const login=$('login-screen');
- if(!usuarioDemo){
-  layout.style.display='none';
-  login.style.display='grid';
-  login.innerHTML=renderLogin();
-  return;
- }
- login.style.display='none';
- layout.style.display='flex';
- $('usuario-atual').textContent=usuarioDemo.admin?'Administrador demonstrativo':usuarioDemo.name+' · '+usuarioDemo.functionName;
- $('estado').textContent=conectado?'Supabase conectado':'Demonstração local';
- $('estado').className='status-pill'+(conectado?'':' local');
- $('mensagem').innerHTML=erro?`<div class="notice error">${h(erro)}</div>`:
- feedback?`<div class="notice">${h(feedback)} <b>As alterações ficam somente neste navegador.</b></div>`:
- `<div class="notice">${conectado?'Dados de consulta carregados do Supabase.':'Você está vendo dados demonstrativos locais.'} <b>Protótipo acadêmico — informações fictícias.</b> <span>Área exibida: ${usuarioDemo.admin?'todas':h(usuarioDemo.functionName+' · '+usuarioDemo.campusName)}. Alterações nos cadernos não são enviadas ao Supabase.</span></div>`;
- document.querySelectorAll('[data-pagina]').forEach(b=>b.classList.toggle('active',b.dataset.pagina===pagina));
- const el=$('conteudo');
- if(detalhe){
-  el.innerHTML=renderDetail();
-  if(detalhe.tipo==='procedimento')carregarPreviewsDocumentos();
-  return;
- }
- if(pagina==='dashboard')el.innerHTML=renderDashboard();
- if(pagina==='cadernos')el.innerHTML=renderCadernos();
- if(pagina==='procedimentos')el.innerHTML=renderProcedimentos();
- if(pagina==='transicoes')el.innerHTML=renderTransicoes();
- if($('pesquisa'))$('pesquisa').value=pesquisa;
-}
+        detailHTML = `
+          <div class="bg-surface-card rounded-2xl border border-surface-line shadow-sm overflow-hidden">
+            <!-- Cabeçalho da Transição Selecionada -->
+            <div class="p-5 sm:p-6 border-b border-surface-line bg-gradient-to-b from-white to-slate-50/50">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                  isFinalizada
+                    ? 'bg-slate-200 text-slate-800'
+                    : 'bg-ifce-soft text-ifce-dark border border-ifce-border'
+                }">
+                  <span class="w-2 h-2 rounded-full ${isFinalizada ? 'bg-slate-600' : 'bg-ifce'}"></span>
+                  ${isFinalizada ? 'Transição Finalizada' : 'Transição em Andamento'}
+                </span>
+                <span class="text-xs text-slate-500">
+                  Iniciada em ${formatDateBR(selected.criadaEm)}
+                  ${isFinalizada && selected.finalizadaEm ? ` • Finalizada em ${formatDateBR(selected.finalizadaEm)}` : ''}
+                </span>
+              </div>
 
-function navegar(page){pagina=page;detalhe=null;pesquisa='';render();window.scrollTo(0,0);}
-document.addEventListener('submit',ev=>{
- if(ev.target.id!=='login-form')return;
- ev.preventDefault();
- const form=new FormData(ev.target);
- const areaId=String(form.get('area')||'');
- const selected=banco.notebooks.find(n=>String(n.id)===areaId);
- if(areaId!=='*'&&!selected)return;
- usuarioDemo={
-  name:String(form.get('usuario')||'Servidor demonstrativo').trim(),
-  admin:areaId==='*',
-  notebookId:selected?.id||null,
-  functionName:selected?.function_name||'Todas as áreas',
-  campusName:selected?unidade(selected):'Todas as unidades'
- };
- pagina='dashboard';detalhe=null;pesquisa='';erro='';feedback='';
- render();
-});
-$('sair').addEventListener('click',()=>{
- usuarioDemo=null;detalhe=null;pesquisa='';erro='';
- render();
-});
-document.addEventListener('submit',ev=>{
- if(ev.target.id!=='caderno-form')return;
- ev.preventDefault();
- try{salvarFormularioCaderno(ev.target);}
- catch(e){erro=e.message;feedback='';render();}
-});
+              <h3 class="text-xl font-bold text-slate-900 leading-snug break-words">
+                ${escapeHtml(caderno ? caderno.nomeFuncao : 'Função não encontrada')}
+              </h3>
+              ${
+                caderno
+                  ? `<p class="text-xs font-medium text-slate-600 mt-1">${escapeHtml(caderno.setor)} • ${escapeHtml(caderno.campus)}</p>`
+                  : ''
+              }
 
-document.addEventListener('click',async ev=>{
- const downloadButton=ev.target.closest('[data-document-download]');
- if(downloadButton){
-  try{
-   const record=await obterPdfLocal(downloadButton.dataset.documentDownload);
-   if(!record?.blob)throw new Error('O arquivo não foi encontrado neste navegador.');
-   const url=URL.createObjectURL(record.blob);
-   const link=document.createElement('a');
-   link.href=url;link.download=record.name||'documento.pdf';
-   document.body.appendChild(link);link.click();link.remove();
-   setTimeout(()=>URL.revokeObjectURL(url),1500);
-  }catch(error){erro=error.message||'Falha ao baixar o PDF.';feedback='';render();}
-  return;
- }
- const removeButton=ev.target.closest('[data-document-remove]');
- if(removeButton){
-  const id=removeButton.dataset.documentRemove;
-  if(!window.confirm('Remover este PDF do armazenamento local deste navegador?'))return;
-  try{
-   await apagarPdfLocal(id);removerMetadadoDocumento(id);
-   feedback='PDF removido do armazenamento local deste navegador.';erro='';render();
-  }catch(error){erro=error.message||'Não foi possível remover o PDF.';feedback='';render();}
-  return;
- }
- const confirmButton=ev.target.closest('[data-confirmar-transicao]');
- if(confirmButton){
-  const t=banco.transitions.find(item=>String(item.id)===String(confirmButton.dataset.confirmarTransicao));
-  if(!t)return;
-  if(!notebookVisivel(t.notebook_id)){erro='Esta transição não pertence à área selecionada.';render();return;}
-  const role=confirmButton.dataset.papel;
-  const name=role==='outgoing'?t.outgoing_responsible:t.incoming_responsible;
-  try{
-   const saved=salvarConfirmacaoLocal(t.id,role,name);
-   feedback=saved
-    ? (role==='outgoing'?'Confirmação demonstrativa de entrega registrada.':'Confirmação demonstrativa de recebimento registrada.')
-    : 'Esta parte já havia confirmado.';
-   erro='';
-  }catch(error){erro='Não foi possível registrar a confirmação neste navegador.';feedback='';}
-  render();
-  return;
- }
- const createNotebook=ev.target.closest('[data-caderno-novo]');
- if(createNotebook){abrirFormularioCaderno();return;}
- const editNotebook=ev.target.closest('[data-caderno-editar]');
- if(editNotebook){abrirFormularioCaderno(editNotebook.dataset.cadernoEditar);return;}
- if(ev.target.closest('[data-caderno-cancel]')){$('caderno-dialog').close();return;}
- const stepToggle=ev.target.closest('[data-step-toggle]');
- if(stepToggle){
-  const panel=document.getElementById(stepToggle.getAttribute('aria-controls'));
-  if(!panel)return;
-  const expanded=stepToggle.getAttribute('aria-expanded')==='true';
-  stepToggle.setAttribute('aria-expanded',String(!expanded));
-  panel.hidden=expanded;
-  return;
- }
- const nav=ev.target.closest('[data-pagina]');
- if(nav){navegar(nav.dataset.pagina);return;}
- const open=ev.target.closest('[data-abrir]');
- if(open){detalhe={tipo:open.dataset.abrir,id:open.dataset.id};render();window.scrollTo(0,0);return;}
- const action=ev.target.closest('[data-acao]');
- if(action?.dataset.acao==='voltar'){detalhe=null;render();window.scrollTo(0,0);}
-});
-document.addEventListener('change',async ev=>{
- const input=ev.target.closest('[data-document-upload]');
- if(!input)return;
- const file=input.files?.[0];
- if(!file)return;
- const id=input.dataset.documentUpload;
- if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){
-  erro='Selecione um arquivo PDF.';
-  feedback='';
-  render();
-  return;
- }
- if(file.size>20*1024*1024){
-  erro='O PDF ultrapassa o limite de 20 MB desta demonstração. Escolha um arquivo menor.';
-  feedback='';
-  render();
-  return;
- }
- try{
-  await guardarPdfLocal(id,file);
-  salvarMetadadoDocumento(id,{name:file.name,size:file.size,updatedAt:new Date().toISOString()});
-  erro='';
-  feedback=`PDF “${file.name}” anexado e salvo neste navegador.`;
-  render();
- }catch(error){
-  erro='Não foi possível salvar o PDF localmente: '+(error?.message||'armazenamento indisponível.');
-  feedback='';
-  render();
- }
-});
-document.addEventListener('input',ev=>{
- if(ev.target.id!=='pesquisa')return;
- const pos=ev.target.selectionStart;pesquisa=ev.target.value;render();
- const input=$('pesquisa');if(input){input.focus();input.setSelectionRange(pos,pos);}
-});
+              <!-- Responsáveis Fictícios -->
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="rounded-xl bg-white border border-surface-line p-3">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Responsável anterior</p>
+                  <p class="text-sm font-semibold text-slate-800 mt-0.5 break-words">${escapeHtml(selected.responsavelAnterior)}</p>
+                </div>
+                <div class="rounded-xl bg-white border border-surface-line p-3">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-ifce">Novo responsável</p>
+                  <p class="text-sm font-semibold text-slate-900 mt-0.5 break-words">${escapeHtml(selected.novoResponsavel)}</p>
+                </div>
+              </div>
 
-// Supabase: somente leitura. Não cria, altera ou exclui registros.
-function abrirConexao(){
- $('url').value=configuracao?.url||'';$('chave').value=configuracao?.chave||'';$('janela').showModal();
-}
-$('configurar').addEventListener('click',abrirConexao);
-$('fechar').addEventListener('click',()=>$('janela').close());
-$('desconectar').addEventListener('click',()=>{
- localStorage.removeItem('ifce_config_publica');configuracao=null;conectado=false;erro='';banco=demo;detalhe=null;pesquisa='';$('janela').close();render();
-});
+              <!-- Ações Principais -->
+              <div class="mt-4 flex flex-wrap items-center gap-2.5">
+                ${
+                  caderno
+                    ? `
+                      <button
+                        type="button"
+                        onclick="openCadernoViewModal('${escapeHtml(caderno.id)}', true)"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-ifce-soft hover:bg-ifce text-ifce-dark hover:text-white border border-ifce-border text-xs font-semibold transition-colors"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        Consultar Caderno da Função
+                      </button>
+                    `
+                    : ''
+                }
+                ${
+                  !isFinalizada
+                    ? `
+                      <button
+                        type="button"
+                        onclick="openFinalizeConfirmModal('${escapeHtml(selected.id)}')"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-xs font-semibold shadow-sm transition-colors"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Finalizar Transição
+                      </button>
+                    `
+                    : ''
+                }
+              </div>
+            </div>
 
-async function conectar(config){
- const url=config.url.replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
- const chave=config.chave.trim();
- if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url))throw Error('URL inválida. Use a Project URL terminada em .supabase.co.');
- if(chave.startsWith('sb_secret_')||chave.toLowerCase().includes('service_role'))throw Error('Chave secreta não permitida. Use somente a chave pública publishable ou anon.');
- if(!chave.startsWith('sb_publishable_')&&!chave.startsWith('eyJ'))throw Error('Informe uma chave pública publishable ou anon válida.');
- const tables=['campuses','function_notebooks','procedures','documents','transitions','transition_checklists','activities'];
- const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);
- try{
-  const results=await Promise.all(tables.map(async table=>{
-   const headers={'apikey':chave,'Accept-Profile':'ifce_memoria'};
-   if(chave.startsWith('eyJ'))headers.Authorization='Bearer '+chave;
-   const response=await fetch(`${url}/rest/v1/${table}?select=*&limit=1000`,{headers,signal:controller.signal});
-   if(!response.ok)throw Error(`${table}: HTTP ${response.status}. ${(await response.text()).slice(0,220)}`);
-   return response.json();
-  }));
-  banco={campuses:results[0],notebooks:combinarCadernos(results[1]),procedures:results[2],documents:results[3],transitions:results[4],checklists:results[5],activities:results[6]};
-  conectado=true;configuracao={url,chave};erro='';detalhe=null;pesquisa='';
-  localStorage.setItem('ifce_config_publica',JSON.stringify(configuracao));
-  $('janela').close();render();
- }finally{clearTimeout(timer);}
-}
+            <!-- Barra de Progresso em Tempo Real -->
+            <div class="px-5 sm:px-6 py-4 bg-white border-b border-surface-line">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Percentual de Conclusão</p>
+                  <p class="text-xs text-slate-500 mt-0.5">${doneChecklist} de ${totalChecklist} itens do checklist concluídos</p>
+                </div>
+                <span class="text-2xl font-bold text-ifce-dark">${progress}%</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-ifce rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+              </div>
+            </div>
 
-$('formulario').addEventListener('submit',async ev=>{
- ev.preventDefault();const btn=$('enviar');btn.disabled=true;btn.textContent='Conectando...';
- try{await conectar({url:$('url').value.trim(),chave:$('chave').value.trim()});}
- catch(e){conectado=false;banco=demo;erro='Não foi possível conectar: '+(e.name==='AbortError'?'tempo limite excedido.':e.message);$('janela').close();render();}
- finally{btn.disabled=false;btn.textContent='Conectar e carregar';}
-});
+            ${
+              isFinalizada
+                ? `
+                  <div class="mx-5 sm:mx-6 mt-5 rounded-xl bg-slate-100 border border-surface-line px-4 py-3 text-xs text-slate-700 flex items-center gap-2.5">
+                    <svg class="w-4 h-4 text-ifce shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <span>Esta transição foi finalizada em <strong>${formatDateBR(selected.finalizadaEm)}</strong> e está bloqueada contra alterações acidentais.</span>
+                  </div>
+                `
+                : ''
+            }
 
-render();
-try{
- const saved=JSON.parse(localStorage.getItem('ifce_config_publica')||'null');
- if(saved?.url&&saved?.chave)conectar(saved).catch(e=>{conectado=false;banco=demo;erro='Falha ao reconectar: '+e.message;render();});
-}catch(e){/* mantém a demonstração local */}
-</script>
+            <!-- Checklist Interativo de Transferência -->
+            <div class="p-5 sm:p-6 border-b border-surface-line">
+              <h4 class="text-sm font-bold text-slate-900 mb-3">Checklist de Transferência</h4>
+              <div class="space-y-2.5">
+                ${checklistHTML}
+              </div>
+
+              ${
+                !isFinalizada
+                  ? `
+                    <form onsubmit="handleAddChecklistItem(event, '${escapeHtml(selected.id)}')" class="mt-4 flex flex-col sm:flex-row gap-2">
+                      <input
+                        id="new-checklist-input"
+                        type="text"
+                        placeholder="Adicionar novo item ao checklist..."
+                        class="flex-1 px-3.5 py-2.5 rounded-xl border border-surface-line bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm text-slate-800"
+                      />
+                      <button
+                        type="submit"
+                        class="px-4 py-2.5 rounded-xl border border-ifce text-ifce-dark hover:bg-ifce hover:text-white text-xs font-semibold transition-colors shrink-0"
+                      >
+                        + Adicionar item
+                      </button>
+                    </form>
+                  `
+                  : ''
+              }
+            </div>
+
+            <!-- Registro de Pendências -->
+            <div class="p-5 sm:p-6">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <h4 class="text-sm font-bold text-slate-900">Pendências da Transferência</h4>
+                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                  openPendenciasCount > 0 ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-ifce-soft text-ifce-dark'
+                }">
+                  ${openPendenciasCount} ${openPendenciasCount === 1 ? 'aberta' : 'abertas'}
+                </span>
+              </div>
+
+              ${
+                !isFinalizada
+                  ? `
+                    <form onsubmit="handleAddPendencia(event, '${escapeHtml(selected.id)}')" class="mb-4 flex flex-col sm:flex-row gap-2">
+                      <input
+                        id="new-pendencia-input"
+                        type="text"
+                        placeholder="Registrar nova pendência de transferência..."
+                        class="flex-1 px-3.5 py-2.5 rounded-xl border border-surface-line bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm text-slate-800"
+                      />
+                      <button
+                        type="submit"
+                        class="px-4 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-xs font-semibold transition-colors shrink-0"
+                      >
+                        Registrar pendência
+                      </button>
+                    </form>
+                  `
+                  : ''
+              }
+
+              <div class="space-y-2.5">
+                ${pendenciasHTML}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <section class="space-y-6">
+          <!-- Cabeçalho -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Transição de Funções — Campus Mombaça</h2>
+              <p class="text-sm text-slate-600 mt-1">
+                Organize a transferência de atividades entre responsáveis das coordenações do Campus Mombaça, com checklist, consulta ao caderno e registro de pendências.
+              </p>
+            </div>
+            <button
+              type="button"
+              onclick="openNewTransicaoModal()"
+              class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-sm font-semibold shadow-sm transition-colors shrink-0"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              + Iniciar Nova Transição
+            </button>
+          </div>
+
+          <!-- Layout Mestre-Detalhe Responsivo -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="lg:col-span-4">
+              ${sidebarListHTML}
+            </div>
+            <div class="lg:col-span-8 min-w-0">
+              ${detailHTML}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    /**
+     * Seleciona uma transição para exibição detalhada na tela 3.
+     */
+    function selectTransicao(transicaoId) {
+      state.selectedTransicaoId = transicaoId;
+      renderCurrentScreen();
+    }
+
+    /**
+     * Marca ou desmarca um item do checklist e atualiza o estado e o localStorage.
+     */
+    function toggleChecklistItem(transicaoId, itemId) {
+      const transicao = state.transicoes.find((t) => t.id === transicaoId);
+      if (!transicao || transicao.status === 'finalizada') return;
+
+      const item = transicao.checklist.find((i) => i.id === itemId);
+      if (!item) return;
+
+      item.concluido = !item.concluido;
+      saveStateToStorage();
+      renderCurrentScreen();
+    }
+
+    /**
+     * Adiciona um novo item ao checklist de uma transição em andamento.
+     */
+    function handleAddChecklistItem(event, transicaoId) {
+      event.preventDefault();
+      const input = document.getElementById('new-checklist-input');
+      if (!input) return;
+
+      const texto = input.value.trim();
+      if (!texto) {
+        showToast('Informe a descrição do item do checklist.', 'error');
+        input.focus();
+        return;
+      }
+
+      const transicao = state.transicoes.find((t) => t.id === transicaoId);
+      if (!transicao || transicao.status === 'finalizada') return;
+
+      transicao.checklist.push({
+        id: generateId('chk'),
+        texto,
+        concluido: false
+      });
+
+      saveStateToStorage();
+      renderCurrentScreen();
+      showToast('Item adicionado ao checklist.');
+    }
+
+    /**
+     * Registra uma nova pendência na transição selecionada.
+     */
+    function handleAddPendencia(event, transicaoId) {
+      event.preventDefault();
+      const input = document.getElementById('new-pendencia-input');
+      if (!input) return;
+
+      const descricao = input.value.trim();
+      if (!descricao) {
+        showToast('Descreva a pendência antes de registrar.', 'error');
+        input.focus();
+        return;
+      }
+
+      const transicao = state.transicoes.find((t) => t.id === transicaoId);
+      if (!transicao || transicao.status === 'finalizada') return;
+
+      transicao.pendencias.unshift({
+        id: generateId('pend'),
+        descricao,
+        resolvida: false,
+        criadaEm: new Date().toISOString()
+      });
+
+      saveStateToStorage();
+      renderCurrentScreen();
+      showToast('Pendência registrada com sucesso.');
+    }
+
+    /**
+     * Alterna uma pendência entre aberta e resolvida.
+     */
+    function togglePendenciaStatus(transicaoId, pendenciaId) {
+      const transicao = state.transicoes.find((t) => t.id === transicaoId);
+      if (!transicao || transicao.status === 'finalizada') return;
+
+      const pendencia = transicao.pendencias.find((p) => p.id === pendenciaId);
+      if (!pendencia) return;
+
+      pendencia.resolvida = !pendencia.resolvida;
+      saveStateToStorage();
+      renderCurrentScreen();
+      showToast(pendencia.resolvida ? 'Pendência marcada como resolvida.' : 'Pendência reaberta.');
+    }
+
+    /* =========================================================
+       8. MODAIS (CONTROLE CENTRALIZADO)
+       ========================================================= */
+    function openModal(htmlContent, maxWidthClass = 'max-w-2xl') {
+      const backdrop = document.getElementById('modal-backdrop');
+      const container = document.getElementById('modal-container');
+      if (!backdrop || !container) return;
+
+      container.className = `bg-surface-card rounded-2xl shadow-xl border border-surface-line w-full ${maxWidthClass} max-h-[90vh] flex flex-col overflow-hidden`;
+      container.innerHTML = htmlContent;
+      backdrop.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal() {
+      const backdrop = document.getElementById('modal-backdrop');
+      if (!backdrop) return;
+      backdrop.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    // Fechar modal clicando fora ou pressionando Escape
+    document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-backdrop') {
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    /* ---------------------------------------------------------
+       MODAL A: Visualização Completa do Caderno da Função
+       --------------------------------------------------------- */
+    function openCadernoViewModal(cadernoId, readOnlyFromTransicao = false) {
+      const c = getCadernoById(cadernoId);
+      if (!c) {
+        showToast('Caderno de função não encontrado.', 'error');
+        return;
+      }
+
+      const renderFieldBlock = (label, content) => `
+        <div class="rounded-xl bg-slate-50/80 border border-surface-line p-4">
+          <h4 class="text-xs font-bold uppercase tracking-wide text-ifce-dark mb-1.5">${label}</h4>
+          <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line break-words">${escapeHtml(content)}</p>
+        </div>
+      `;
+
+      const html = `
+        <div class="px-6 py-4 border-b border-surface-line flex items-start justify-between gap-4 bg-white">
+          <div class="min-w-0">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-ifce-soft text-ifce-dark text-[11px] font-semibold mb-1.5">
+              Caderno da Função
+            </span>
+            <h3 class="text-lg font-bold text-slate-900 leading-snug break-words">${escapeHtml(c.nomeFuncao)}</h3>
+            <p class="text-xs text-slate-600 mt-1">${escapeHtml(c.setor)} • ${escapeHtml(c.campus)}</p>
+          </div>
+          <button
+            type="button"
+            onclick="closeModal()"
+            aria-label="Fechar janela"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-4">
+          ${renderFieldBlock('Responsabilidades', c.responsabilidades)}
+          ${renderFieldBlock('Atividades rotineiras', c.atividadesRotineiras)}
+          ${renderFieldBlock('Procedimentos passo a passo', c.procedimentosPassoAPasso)}
+          ${renderFieldBlock('Sistemas utilizados', c.sistemasUtilizados)}
+          ${renderFieldBlock('Prazos importantes', c.prazosImportantes)}
+          ${renderFieldBlock('Conhecimentos essenciais para executar a função', c.conhecimentosEssenciais)}
+        </div>
+
+        <div class="px-6 py-4 border-t border-surface-line bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+          <span class="text-xs text-slate-500">Última atualização: ${formatDateBR(c.atualizadoEm)}</span>
+          <div class="flex items-center gap-2">
+            ${
+              !readOnlyFromTransicao
+                ? `
+                  <button
+                    type="button"
+                    onclick="openCadernoFormModal('${escapeHtml(c.id)}')"
+                    class="px-4 py-2 rounded-xl border border-ifce text-ifce-dark hover:bg-ifce hover:text-white text-xs font-semibold transition-colors"
+                  >
+                    Editar caderno
+                  </button>
+                `
+                : ''
+            }
+            <button
+              type="button"
+              onclick="closeModal()"
+              class="px-4 py-2 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-xs font-semibold transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      `;
+
+      openModal(html, 'max-w-3xl');
+    }
+
+    /* ---------------------------------------------------------
+       MODAL B: Cadastrar / Editar Caderno de Função (8 campos)
+       --------------------------------------------------------- */
+    function openCadernoFormModal(cadernoId = null) {
+      const existing = cadernoId ? getCadernoById(cadernoId) : null;
+      const isEdit = Boolean(existing);
+
+      const html = `
+        <div class="px-6 py-4 border-b border-surface-line flex items-center justify-between gap-4 bg-white">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">${isEdit ? 'Editar Caderno de Função' : 'Novo Caderno de Função'}</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Use exemplos demonstrativos. Ajuste as informações às rotinas efetivamente adotadas no Campus Mombaça.</p>
+          </div>
+          <button
+            type="button"
+            onclick="closeModal()"
+            aria-label="Fechar formulário"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <form id="caderno-form" onsubmit="handleSaveCaderno(event, ${isEdit ? `'${escapeHtml(existing.id)}'` : 'null'})" class="flex flex-col flex-1 overflow-hidden">
+          <div class="p-6 overflow-y-auto space-y-4">
+            <div id="caderno-form-error" class="hidden rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-xs font-medium text-red-700"></div>
+
+            <!-- 1. Nome da função -->
+            <div>
+              <label for="field-nomeFuncao" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Nome da função <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="field-nomeFuncao"
+                type="text"
+                required
+                value="${escapeHtml(existing ? existing.nomeFuncao : '')}"
+                placeholder="Ex.: Apoio à gestão de contratos administrativos"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+              />
+            </div>
+
+            <!-- 2. Setor e Campus -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="field-setor" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Coordenação <span class="text-red-500">*</span>
+                </label>
+                <select
+                  id="field-setor"
+                  required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+                >
+                  ${SETORES_CAMPUS.map((setor) => `<option value="${escapeHtml(setor)}" ${(existing ? existing.setor : SETORES_CAMPUS[0]) === setor ? 'selected' : ''}>${escapeHtml(setor)}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label for="field-campus" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Campus <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="field-campus"
+                  type="text"
+                  required
+                  readonly
+                  value="${CAMPUS_NAME}"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-slate-100 text-slate-600 cursor-not-allowed text-sm"
+                />
+              </div>
+            </div>
+
+            <!-- 3. Responsabilidades -->
+            <div>
+              <label for="field-responsabilidades" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Responsabilidades <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="field-responsabilidades"
+                rows="3"
+                required
+                placeholder="Descreva as principais atribuições e responsabilidades da função..."
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+              >${escapeHtml(existing ? existing.responsabilidades : '')}</textarea>
+            </div>
+
+            <!-- 4. Atividades rotineiras -->
+            <div>
+              <label for="field-atividadesRotineiras" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Atividades rotineiras <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="field-atividadesRotineiras"
+                rows="3"
+                required
+                placeholder="Liste as tarefas diárias, semanais ou mensais executadas na rotina..."
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+              >${escapeHtml(existing ? existing.atividadesRotineiras : '')}</textarea>
+            </div>
+
+            <!-- 5. Procedimentos passo a passo -->
+            <div>
+              <label for="field-procedimentosPassoAPasso" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Procedimentos passo a passo <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="field-procedimentosPassoAPasso"
+                rows="4"
+                required
+                placeholder="Descreva a sequência prática de etapas para executar os principais fluxos..."
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+              >${escapeHtml(existing ? existing.procedimentosPassoAPasso : '')}</textarea>
+            </div>
+
+            <!-- 6. Sistemas utilizados -->
+            <div>
+              <label for="field-sistemasUtilizados" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Sistemas utilizados <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="field-sistemasUtilizados"
+                rows="2"
+                required
+                placeholder="Ex.: sistema institucional utilizado pelo IFCE, planilhas de acompanhamento e pastas compartilhadas"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+              >${escapeHtml(existing ? existing.sistemasUtilizados : '')}</textarea>
+            </div>
+
+            <!-- 7. Prazos importantes -->
+            <div>
+              <label for="field-prazosImportantes" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Prazos importantes <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="field-prazosImportantes"
+                rows="2"
+                required
+                placeholder="Indique datas recorrentes, vencimentos críticos e entregas obrigatórias..."
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+              >${escapeHtml(existing ? existing.prazosImportantes : '')}</textarea>
+            </div>
+
+            <!-- 8. Conhecimentos essenciais -->
+            <div>
+              <label for="field-conhecimentosEssenciais" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Conhecimentos essenciais para executar a função <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="field-conhecimentosEssenciais"
+                rows="3"
+                required
+                placeholder="Informe normas, habilidades técnicas e conhecimentos práticos indispensáveis..."
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+              >${escapeHtml(existing ? existing.conhecimentosEssenciais : '')}</textarea>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 border-t border-surface-line bg-slate-50 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onclick="closeModal()"
+              class="px-4 py-2.5 rounded-xl border border-surface-line bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-xs font-semibold shadow-sm transition-colors"
+            >
+              ${isEdit ? 'Salvar alterações' : 'Cadastrar caderno'}
+            </button>
+          </div>
+        </form>
+      `;
+
+      openModal(html, 'max-w-3xl');
+    }
+
+    /**
+     * Valida e salva um caderno novo ou editado.
+     */
+    function handleSaveCaderno(event, cadernoId) {
+      event.preventDefault();
+
+      const fields = {
+        nomeFuncao: document.getElementById('field-nomeFuncao')?.value.trim() || '',
+        setor: document.getElementById('field-setor')?.value.trim() || '',
+        campus: document.getElementById('field-campus')?.value.trim() || '',
+        responsabilidades: document.getElementById('field-responsabilidades')?.value.trim() || '',
+        atividadesRotineiras: document.getElementById('field-atividadesRotineiras')?.value.trim() || '',
+        procedimentosPassoAPasso: document.getElementById('field-procedimentosPassoAPasso')?.value.trim() || '',
+        sistemasUtilizados: document.getElementById('field-sistemasUtilizados')?.value.trim() || '',
+        prazosImportantes: document.getElementById('field-prazosImportantes')?.value.trim() || '',
+        conhecimentosEssenciais: document.getElementById('field-conhecimentosEssenciais')?.value.trim() || ''
+      };
+
+      const hasEmpty = Object.values(fields).some((val) => !val);
+      if (hasEmpty) {
+        const errorBox = document.getElementById('caderno-form-error');
+        if (errorBox) {
+          errorBox.textContent = 'Preencha todos os campos obrigatórios antes de salvar o caderno.';
+          errorBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (cadernoId) {
+        const index = state.cadernos.findIndex((c) => c.id === cadernoId);
+        if (index !== -1) {
+          state.cadernos[index] = {
+            ...state.cadernos[index],
+            ...fields,
+            atualizadoEm: new Date().toISOString()
+          };
+          saveStateToStorage();
+          closeModal();
+          renderCurrentScreen();
+          showToast('Caderno de função atualizado com sucesso.');
+        }
+      } else {
+        const novoCaderno = {
+          id: generateId('cad'),
+          ...fields,
+          atualizadoEm: new Date().toISOString()
+        };
+        state.cadernos.unshift(novoCaderno);
+        saveStateToStorage();
+        closeModal();
+        renderCurrentScreen();
+        showToast('Novo caderno de função cadastrado com sucesso.');
+      }
+    }
+
+    /* ---------------------------------------------------------
+       MODAL C: Iniciar Nova Transição de Função
+       --------------------------------------------------------- */
+    let draftChecklistItems = [];
+
+    function openNewTransicaoModal() {
+      if (state.cadernos.length === 0) {
+        showToast('Cadastre ao menos um Caderno de Função antes de iniciar uma transição.', 'error');
+        return;
+      }
+
+      draftChecklistItems = [...DEFAULT_CHECKLIST_ITEMS];
+
+      const optionsHTML = state.cadernos
+        .map(
+          (c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nomeFuncao)} — ${escapeHtml(c.setor)}</option>`
+        )
+        .join('');
+
+      const html = `
+        <div class="px-6 py-4 border-b border-surface-line flex items-center justify-between gap-4 bg-white">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Iniciar Nova Transição de Função</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Utilize nomes demonstrativos, sem inserir dados pessoais reais.</p>
+          </div>
+          <button
+            type="button"
+            onclick="closeModal()"
+            aria-label="Fechar"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <form onsubmit="handleCreateTransicao(event)" class="flex flex-col flex-1 overflow-hidden">
+          <div class="p-6 overflow-y-auto space-y-4">
+            <div id="transicao-form-error" class="hidden rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-xs font-medium text-red-700"></div>
+
+            <div>
+              <label for="trans-caderno" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                Caderno da Função <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="trans-caderno"
+                required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm text-slate-800"
+              >
+                ${optionsHTML}
+              </select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="trans-anterior" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Responsável anterior <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="trans-anterior"
+                  type="text"
+                  required
+                  placeholder="Ex.: Responsável anterior (exemplo fictício)"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+                />
+              </div>
+              <div>
+                <label for="trans-novo" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Novo responsável <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="trans-novo"
+                  type="text"
+                  required
+                  placeholder="Ex.: Novo responsável (exemplo fictício)"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-surface-line bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-sm"
+                />
+              </div>
+            </div>
+
+            <!-- Checklist inicial editável -->
+            <div class="pt-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-2">
+                Checklist inicial de transferência
+              </label>
+              <div id="draft-checklist-list" class="space-y-2 mb-3">
+                ${renderDraftChecklistHTML()}
+              </div>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input
+                  id="draft-checklist-input"
+                  type="text"
+                  placeholder="Adicionar item extra ao checklist inicial..."
+                  class="flex-1 px-3.5 py-2 rounded-xl border border-surface-line bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ifce/30 focus:border-ifce text-xs text-slate-800"
+                />
+                <button
+                  type="button"
+                  onclick="addDraftChecklistItem()"
+                  class="px-3.5 py-2 rounded-xl border border-ifce text-ifce-dark hover:bg-ifce hover:text-white text-xs font-semibold transition-colors shrink-0"
+                >
+                  + Incluir item
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 border-t border-surface-line bg-slate-50 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onclick="closeModal()"
+              class="px-4 py-2.5 rounded-xl border border-surface-line bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-xs font-semibold shadow-sm transition-colors"
+            >
+              Iniciar transição
+            </button>
+          </div>
+        </form>
+      `;
+
+      openModal(html, 'max-w-2xl');
+    }
+
+    function renderDraftChecklistHTML() {
+      if (draftChecklistItems.length === 0) {
+        return `<p class="text-xs text-slate-500 italic">Nenhum item no checklist inicial.</p>`;
+      }
+      return draftChecklistItems
+        .map(
+          (item, index) => `
+            <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-surface-line text-xs text-slate-700">
+              <span class="break-words">${escapeHtml(item)}</span>
+              <button
+                type="button"
+                onclick="removeDraftChecklistItem(${index})"
+                aria-label="Remover item"
+                class="text-slate-400 hover:text-red-600 p-1 rounded-lg transition-colors shrink-0"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          `
+        )
+        .join('');
+    }
+
+    function addDraftChecklistItem() {
+      const input = document.getElementById('draft-checklist-input');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) return;
+      draftChecklistItems.push(val);
+      input.value = '';
+      const listEl = document.getElementById('draft-checklist-list');
+      if (listEl) listEl.innerHTML = renderDraftChecklistHTML();
+    }
+
+    function removeDraftChecklistItem(index) {
+      draftChecklistItems.splice(index, 1);
+      const listEl = document.getElementById('draft-checklist-list');
+      if (listEl) listEl.innerHTML = renderDraftChecklistHTML();
+    }
+
+    /**
+     * Cria uma nova transição de função, salva no localStorage e a seleciona imediatamente.
+     */
+    function handleCreateTransicao(event) {
+      event.preventDefault();
+
+      const cadernoId = document.getElementById('trans-caderno')?.value || '';
+      const responsavelAnterior = document.getElementById('trans-anterior')?.value.trim() || '';
+      const novoResponsavel = document.getElementById('trans-novo')?.value.trim() || '';
+
+      if (!cadernoId || !responsavelAnterior || !novoResponsavel) {
+        const errEl = document.getElementById('transicao-form-error');
+        if (errEl) {
+          errEl.textContent = 'Selecione o caderno e informe os responsáveis usando nomes demonstrativos.';
+          errEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const checklistFinal =
+        draftChecklistItems.length > 0 ? draftChecklistItems : [...DEFAULT_CHECKLIST_ITEMS];
+
+      const novaTransicao = {
+        id: generateId('trans'),
+        cadernoId,
+        responsavelAnterior,
+        novoResponsavel,
+        status: 'em_andamento',
+        criadaEm: new Date().toISOString(),
+        finalizadaEm: null,
+        checklist: checklistFinal.map((texto) => ({
+          id: generateId('chk'),
+          texto,
+          concluido: false
+        })),
+        pendencias: []
+      };
+
+      state.transicoes.unshift(novaTransicao);
+      state.selectedTransicaoId = novaTransicao.id;
+      saveStateToStorage();
+      closeModal();
+
+      if (state.currentScreen !== 'transicoes') {
+        navigateTo('transicoes', { transicaoId: novaTransicao.id });
+      } else {
+        renderCurrentScreen();
+      }
+      showToast('Nova transição de função iniciada.');
+    }
+
+    /* ---------------------------------------------------------
+       MODAL D: Confirmação Personalizada para Finalizar Transição
+       (Sem uso de alert() ou confirm() nativos)
+       --------------------------------------------------------- */
+    function openFinalizeConfirmModal(transicaoId) {
+      const t = state.transicoes.find((item) => item.id === transicaoId);
+      if (!t || t.status === 'finalizada') return;
+
+      const caderno = getCadernoById(t.cadernoId);
+      const pendingChecklist = t.checklist.filter((i) => !i.concluido).length;
+      const openPendencias = t.pendencias.filter((p) => !p.resolvida).length;
+      const hasWarnings = pendingChecklist > 0 || openPendencias > 0;
+
+      const html = `
+        <div class="px-6 py-4 border-b border-surface-line flex items-center justify-between gap-4 bg-white">
+          <h3 class="text-lg font-bold text-slate-900">Finalizar Transição de Função</h3>
+          <button
+            type="button"
+            onclick="closeModal()"
+            aria-label="Fechar"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <p class="text-sm text-slate-700 leading-relaxed">
+            Você está prestes a finalizar a transição da função
+            <strong class="text-slate-900">${escapeHtml(caderno ? caderno.nomeFuncao : 'selecionada')}</strong>
+            (${escapeHtml(t.responsavelAnterior)} → ${escapeHtml(t.novoResponsavel)}).
+          </p>
+
+          ${
+            hasWarnings
+              ? `
+                <div class="rounded-xl bg-amber-50 border border-amber-200 p-4 space-y-1.5 text-xs text-amber-900">
+                  <p class="font-bold">Atenção: ainda existem itens pendentes nesta transição</p>
+                  <ul class="list-disc list-inside space-y-1">
+                    ${
+                      pendingChecklist > 0
+                        ? `<li>${pendingChecklist} ${pendingChecklist === 1 ? 'item do checklist ainda não foi marcado' : 'itens do checklist ainda não foram marcados'} como concluído.</li>`
+                        : ''
+                    }
+                    ${
+                      openPendencias > 0
+                        ? `<li>${openPendencias} ${openPendencias === 1 ? 'pendência de transferência continua em aberto' : 'pendências de transferência continuam em aberto'}.</li>`
+                        : ''
+                    }
+                  </ul>
+                  <p class="pt-1 text-amber-800">Deseja finalizar a transição mesmo assim?</p>
+                </div>
+              `
+              : `
+                <div class="rounded-xl bg-ifce-soft border border-ifce-border p-4 text-xs text-ifce-dark font-medium">
+                  Todos os itens do checklist estão concluídos e não há pendências em aberto.
+                </div>
+              `
+          }
+
+          <p class="text-xs text-slate-500">
+            Após a finalização, a data de conclusão será registrada e os registros desta transição serão bloqueados para preservar o histórico.
+          </p>
+        </div>
+
+        <div class="px-6 py-4 border-t border-surface-line bg-slate-50 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onclick="closeModal()"
+            class="px-4 py-2.5 rounded-xl border border-surface-line bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors"
+          >
+            Voltar
+          </button>
+          <button
+            type="button"
+            onclick="confirmFinalizeTransicao('${escapeHtml(t.id)}')"
+            class="px-5 py-2.5 rounded-xl bg-ifce hover:bg-ifce-dark text-white text-xs font-semibold shadow-sm transition-colors"
+          >
+            Confirmar finalização
+          </button>
+        </div>
+      `;
+
+      openModal(html, 'max-w-lg');
+    }
+
+    /**
+     * Conclui a transição, grava a data e atualiza imediatamente o estado e o Painel.
+     */
+    function confirmFinalizeTransicao(transicaoId) {
+      const t = state.transicoes.find((item) => item.id === transicaoId);
+      if (!t || t.status === 'finalizada') return;
+
+      t.status = 'finalizada';
+      t.finalizadaEm = new Date().toISOString();
+      saveStateToStorage();
+      closeModal();
+      renderCurrentScreen();
+      showToast('Transição finalizada e indicadores atualizados.');
+    }
+
+    /* =========================================================
+       9. INICIALIZAÇÃO DA APLICAÇÃO
+       ========================================================= */
+    /**
+     * Login exclusivamente demonstrativo: qualquer par não vazio de usuário/senha permite entrar.
+     * Não realiza autenticação real nem aplica permissões por perfil.
+     */
+    function handleDemoLogin(event) {
+      if (event) event.preventDefault();
+      const username = (document.getElementById('demo-username')?.value || '').trim();
+      const password = document.getElementById('demo-password')?.value || '';
+      const role = document.getElementById('demo-role')?.value || 'Usuário demonstrativo';
+
+      if (!username || !password) {
+        showToast('Informe qualquer usuário e qualquer senha para continuar.', 'error');
+        return false;
+      }
+
+      const loginScreen = document.getElementById('demo-login-screen');
+      if (loginScreen) loginScreen.classList.add('hidden');
+
+      const sessionLabel = document.getElementById('demo-session-label');
+      if (sessionLabel) {
+        sessionLabel.textContent = `${role} • ${username}`;
+        sessionLabel.classList.remove('hidden');
+      }
+
+      showToast('Acesso demonstrativo iniciado. A autenticação é apenas ilustrativa.', 'info');
+      return false;
+    }
+
+    /** Reabre a tela de acesso para repetir a demonstração. */
+    function demoLogout() {
+      const loginScreen = document.getElementById('demo-login-screen');
+      if (loginScreen) loginScreen.classList.remove('hidden');
+      const sessionLabel = document.getElementById('demo-session-label');
+      if (sessionLabel) {
+        sessionLabel.textContent = '';
+        sessionLabel.classList.add('hidden');
+      }
+      const password = document.getElementById('demo-password');
+      if (password) password.value = '';
+      const username = document.getElementById('demo-username');
+      if (username) username.focus();
+    }
+
+    function initApp() {
+      loadStateFromStorage();
+      if (state.transicoes.length > 0) {
+        const active = state.transicoes.find((t) => t.status === 'em_andamento');
+        state.selectedTransicaoId = active ? active.id : state.transicoes[0].id;
+      }
+      updateNavigationHighlight();
+      renderCurrentScreen();
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
 </body>
 </html>
